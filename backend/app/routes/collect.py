@@ -1,14 +1,23 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter
 from pydantic import BaseModel
+from typing import Optional
 
 router = APIRouter()
 
-class CollectPayload(BaseModel):
+class ClipPayload(BaseModel):
     theme: str
-    note: str
-    url: str
+    content_type: str
+    content: str
+    description: Optional[str] = None
 
-@router.post("/collect")
-async def collect(payload: CollectPayload):
-    print(payload)
-    return {"message": "Item saved"}
+# In-memory storage for demo
+clips = []
+
+@router.post("/clip")
+async def save_clip(payload: ClipPayload):
+    clips.append(payload)
+    return {"message": "Clip saved", "clip": payload}
+
+@router.get("/clips")
+async def get_clips():
+    return clips
