@@ -5,6 +5,7 @@ from app.routes.ideas import router as ideas_router
 from app.routes.clips import router as clips_router
 from app.routes.tags import router as tags_router
 from app.routes.db import router as db_router
+from app.routes.auth import router as auth_router
 
 app = FastAPI()
 
@@ -16,6 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(collect_router)
 app.include_router(ideas_router)
 app.include_router(clips_router)

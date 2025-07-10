@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.schemas import ClipkitPayload
 from app.models.db_models import User, Idea, Clip, Tag
 from app.db.session import SessionLocal
+from app.core.auth import get_current_user
 
 router = APIRouter()
 
@@ -14,7 +15,14 @@ def get_db():
         db.close()
 
 @router.post("/collect")
-def collect(payload: ClipkitPayload, db: Session = Depends(get_db)):
+def collect(
+    payload: ClipkitPayload,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Verify the user in payload matches the authenticated user
+    if payload.user.id != current_user.id:
+        raise HTTPException(status_code=403, detail="Cannot collect data for another user")
     # Upsert user
     user_obj = db.query(User).filter_by(id=payload.user.id).first()
     if not user_obj:

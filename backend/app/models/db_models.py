@@ -11,6 +11,7 @@ class User(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
+    hashed_password = Column(String, nullable=False)
     ideas = relationship("Idea", back_populates="user")
 
 class Idea(Base):
