@@ -236,7 +236,7 @@ export default function DashboardPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="relative bg-brand-50 rounded-2xl shadow-xl p-8 w-full max-w-2xl mx-4 border border-brand-200/50"
+              className="relative bg-brand-50 rounded-2xl shadow-2xl p-8 w-full max-w-2xl mx-4 border-0 drop-shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
               <IdeaWorkspace
@@ -314,7 +314,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <input
-          className="flex-1 text-2xl font-bold border-b-2 border-accent-200 focus:border-accent-500 outline-none bg-transparent"
+          className="flex-1 text-2xl font-bold border-0 border-b-2 border-accent-100 focus:border-accent-400 outline-none bg-transparent transition-all shadow-none"
           placeholder="Idea Title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -327,7 +327,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
         </Button>
       </div>
       <textarea
-        className="w-full min-h-[60px] border border-brand-300 rounded-lg p-3 focus:ring-2 focus:ring-accent-400 focus:border-transparent transition-all bg-brand-50 text-brand-800"
+        className="w-full min-h-[60px] border-0 rounded-xl p-3 focus:ring-2 focus:ring-accent-200 focus:border-transparent transition-all bg-brand-50 text-brand-800 shadow-sm"
         placeholder="Describe your idea..."
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -337,7 +337,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
         {tags.map((tag) => (
           <span
             key={tag}
-            className="px-2 py-1 text-xs rounded-md bg-accent-100 text-accent-700 font-medium flex items-center gap-1"
+            className="px-2 py-1 text-xs rounded-md bg-accent-100 text-accent-700 font-medium flex items-center gap-1 shadow-sm border-0"
           >
             <svg
               className="w-3 h-3"
@@ -360,7 +360,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
           </span>
         ))}
         <input
-          className="px-2 py-1 text-xs border border-brand-300 rounded-md bg-brand-50 focus:ring-1 focus:ring-accent-300 focus:border-accent-300 outline-none ml-2"
+          className="px-2 py-1 text-xs border-0 rounded-md bg-brand-50 focus:ring-1 focus:ring-accent-200 focus:border-accent-200 outline-none ml-2 shadow-sm"
           placeholder="Add tag"
           value={tagInput}
           onChange={(e) => setTagInput(e.target.value)}
@@ -382,7 +382,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
         <div className="mb-2 font-semibold text-brand-700">Clips</div>
         <div className="flex gap-2 mb-4 items-center">
           <select
-            className="border border-brand-300 rounded-md px-2 py-1 text-sm bg-brand-50 text-brand-700 focus:ring-1 focus:ring-accent-300 focus:border-accent-300 outline-none"
+            className="border-0 rounded-md px-2 py-1 text-sm bg-brand-50 text-brand-700 focus:ring-1 focus:ring-accent-200 focus:border-accent-200 outline-none shadow-sm"
             value={clipType}
             onChange={(e) => setClipType(e.target.value)}
           >
@@ -394,7 +394,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
           </select>
           {clipType === "code" && (
             <select
-              className="border border-brand-300 rounded-md px-2 py-1 text-sm bg-brand-50 text-brand-700 focus:ring-1 focus:ring-accent-300 focus:border-accent-300 outline-none"
+              className="border-0 rounded-md px-2 py-1 text-sm bg-brand-50 text-brand-700 focus:ring-1 focus:ring-accent-200 focus:border-accent-200 outline-none shadow-sm"
               value={codeLang}
               onChange={(e) => setCodeLang(e.target.value)}
             >
@@ -406,7 +406,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
             </select>
           )}
           <input
-            className="flex-1 px-3 py-1 border border-brand-300 rounded-md focus:ring-1 focus:ring-secondary-300 focus:border-secondary-300 outline-none bg-brand-50"
+            className="flex-1 px-3 py-1 border-0 rounded-md focus:ring-1 focus:ring-secondary-200 focus:border-secondary-200 outline-none bg-brand-50 shadow-sm"
             placeholder={
               clipType === "text"
                 ? "Add a note..."
@@ -430,7 +430,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
             onClick={addClip}
             variant="secondary"
             size="sm"
-            className="px-4 py-1 bg-secondary-600 text-white hover:bg-secondary-700"
+            className="px-4 py-1 bg-secondary-600 text-white hover:bg-secondary-700 shadow-md"
           >
             Add
           </Button>
@@ -444,24 +444,24 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
           {clips.map((clip) => (
             <div
               key={clip.id}
-              className={`flex items-center gap-3 p-2 rounded-md transition-all border shadow-sm ${
+              className={`flex items-center gap-3 p-2 rounded-xl transition-all shadow-md border-0 ${
                 clip.type === "text"
-                  ? "bg-accent-50/70 border-accent-200/50"
+                  ? "bg-accent-50/80"
                   : clip.type === "image"
-                  ? "bg-secondary-50/70 border-secondary-200/50"
+                  ? "bg-secondary-50/80"
                   : clip.type === "video"
-                  ? "bg-brand-100/70 border-brand-200/50"
+                  ? "bg-brand-100/80"
                   : clip.type === "code"
-                  ? "bg-brand-900 border-brand-800"
+                  ? "bg-brand-900"
                   : clip.type === "link"
-                  ? "bg-success-50/70 border-success-500/20"
-                  : "bg-brand-100/70 border-brand-200/50"
+                  ? "bg-success-50/80"
+                  : "bg-brand-100/80"
               }`}
             >
               <span className="text-lg">
                 {clip.type === "text" && (
                   <svg
-                    className="w-5 h-5"
+                    className="w-5 h-5 text-accent-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -477,7 +477,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
                 {clip.type === "link" && (
                   <svg
-                    className="w-5 h-5"
+                    className="w-5 h-5 text-success-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -490,7 +490,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
                 {clip.type === "image" && (
                   <svg
-                    className="w-5 h-5"
+                    className="w-5 h-5 text-secondary-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -504,7 +504,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
                 {clip.type === "video" && (
                   <svg
-                    className="w-5 h-5"
+                    className="w-5 h-5 text-brand-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -517,7 +517,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
                 {clip.type === "code" && (
                   <svg
-                    className="w-5 h-5"
+                    className="w-5 h-5 text-green-300"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -547,7 +547,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                     className="h-12 rounded shadow bg-black"
                   />
                 ) : clip.type === "code" ? (
-                  <pre className="overflow-x-auto text-xs p-2 rounded bg-brand-900">
+                  <pre className="overflow-x-auto text-xs p-2 rounded bg-brand-900/80">
                     <code>{clip.content}</code>
                   </pre>
                 ) : clip.type === "link" ? (
@@ -593,7 +593,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
         <Button
           variant="secondary"
           size="sm"
-          className="flex items-center gap-1"
+          className="flex items-center gap-1 shadow-md"
         >
           <svg
             className="w-3 h-3"
