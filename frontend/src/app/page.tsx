@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-white to-gray-50">
-      <header className="fixed top-0 w-full border-b bg-white/80 backdrop-blur-md z-50">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-brand-50 to-brand-100">
+      <header className="fixed top-0 w-full border-b border-brand-200 bg-brand-50/80 backdrop-blur-md z-50">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <motion.div
@@ -28,12 +28,12 @@ export default function Home() {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-8 w-8 group-hover:text-purple-600 transition-colors"
+                    className="h-8 w-8 text-accent-600 group-hover:text-accent-500 transition-colors"
                   >
                     <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
                   </svg>
                 </motion.div>
-                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600 group-hover:from-purple-500 group-hover:to-pink-500 transition-all duration-300">
+                <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-accent-600 to-secondary-600 group-hover:from-accent-500 group-hover:to-secondary-500 transition-all duration-300">
                   ClipKit
                 </span>
               </Link>
@@ -45,16 +45,16 @@ export default function Home() {
               className="flex items-center space-x-4"
             >
               <Link href="/auth" className="relative px-4 py-2 group">
-                <span className="relative z-10 text-gray-900 transition-colors group-hover:text-white">
+                <span className="relative z-10 text-brand-700 transition-colors group-hover:text-brand-50">
                   Login
                 </span>
-                <div className="absolute inset-0 h-full w-full scale-0 rounded-md bg-black transition-transform group-hover:scale-100"></div>
+                <div className="absolute inset-0 h-full w-full scale-0 rounded-md bg-brand-800 transition-transform group-hover:scale-100"></div>
               </Link>
               <Link
                 href="/auth"
-                className="relative inline-flex items-center justify-center px-6 py-2 overflow-hidden font-medium transition-all bg-black rounded-md hover:bg-black group"
+                className="relative inline-flex items-center justify-center px-6 py-2 overflow-hidden font-medium transition-all bg-accent-600 rounded-md hover:bg-accent-500 group"
               >
-                <span className="w-full relative text-white transition-colors group-hover:text-white">
+                <span className="w-full relative text-brand-50 transition-colors group-hover:text-brand-50">
                   Get Started
                 </span>
               </Link>
@@ -76,7 +76,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="text-4xl font-bold tracking-tight sm:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-purple-900 to-violet-900"
+                className="text-4xl font-bold tracking-tight sm:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-brand-900 via-brand-800 to-brand-700"
               >
                 Collect, organize, and manage your digital content
               </motion.h1>
@@ -84,7 +84,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="mt-6 text-lg leading-8 text-gray-600"
+                className="mt-6 text-lg leading-8 text-brand-600"
               >
                 Seamlessly save content from anywhere on the web. Organize your
                 research, ideas, and inspirations in one place.
@@ -97,9 +97,9 @@ export default function Home() {
               >
                 <Link
                   href="/auth"
-                  className="relative inline-flex items-center justify-center px-8 py-4 font-semibold tracking-wide overflow-hidden rounded-lg group bg-gradient-to-r from-purple-600 to-pink-600"
+                  className="relative inline-flex items-center justify-center px-8 py-4 font-semibold tracking-wide overflow-hidden rounded-lg group bg-gradient-to-r from-accent-600 to-secondary-600 hover:from-accent-500 hover:to-secondary-500 transition-all duration-300"
                 >
-                  <span className="relative text-white group-hover:scale-110 transition-transform duration-200">
+                  <span className="relative text-brand-50 group-hover:scale-110 transition-transform duration-200">
                     Start Collecting →
                   </span>
                 </Link>
@@ -124,16 +124,16 @@ export default function Home() {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2 }}
                 whileHover={{ y: -5 }}
-                className="group relative overflow-hidden rounded-2xl bg-white p-8 shadow-md hover:shadow-xl transition-all duration-300"
+                className="group relative overflow-hidden rounded-2xl bg-brand-50 p-8 shadow-md hover:shadow-xl border border-brand-200 transition-all duration-300"
               >
                 <div className="relative z-10">
-                  <div className="mb-6 text-purple-600">{card.icon}</div>
-                  <h3 className="text-xl font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                  <div className="mb-6 text-accent-600">{card.icon}</div>
+                  <h3 className="text-xl font-semibold text-brand-800 group-hover:text-accent-600 transition-colors">
                     {card.title}
                   </h3>
-                  <p className="mt-2 text-gray-600">{card.description}</p>
+                  <p className="mt-2 text-brand-600">{card.description}</p>
                 </div>
-                <div className="absolute inset-0 z-0 bg-gradient-to-r from-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute inset-0 z-0 bg-gradient-to-r from-accent-50 to-secondary-50 opacity-0 group-hover:opacity-100 transition-opacity" />
               </motion.div>
             ))}
           </motion.div>
@@ -144,15 +144,15 @@ export default function Home() {
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        className="border-t bg-white/90 backdrop-blur-sm"
+        className="border-t border-brand-200 bg-brand-50/90 backdrop-blur-sm"
       >
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-          <p className="text-center text-sm text-gray-600">
+          <p className="text-center text-sm text-brand-600">
             Built with{" "}
             <motion.span
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ repeat: Infinity, duration: 2 }}
-              className="inline-block text-red-500"
+              className="inline-block text-secondary-500"
             >
               ❤️
             </motion.span>{" "}

@@ -116,7 +116,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
+          <span className="bg-brand-50 px-2 text-brand-500">
             Or continue with
           </span>
         </div>
@@ -125,7 +125,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
         <button
           type="button"
-          className="underline"
+          className="underline text-accent-600 hover:text-accent-500 transition-colors"
           onClick={() => setIsRegister(!isRegister)}
         >
           {isRegister ? "Sign In" : "Sign Up"}

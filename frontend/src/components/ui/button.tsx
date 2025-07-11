@@ -4,11 +4,16 @@ import { cn } from "@/lib/utils";
 const buttonStyles = {
   base: "inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus:outline-none disabled:opacity-50 disabled:pointer-events-none",
   variants: {
-    primary: "bg-black text-white hover:bg-gray-800 active:bg-gray-900",
-    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300",
-    outline: "border-2 border-black text-black hover:bg-black hover:text-white",
-    ghost: "text-gray-900 hover:bg-gray-100 active:bg-gray-200",
-    link: "text-black underline-offset-4 hover:underline",
+    primary:
+      "bg-gradient-to-r from-accent-600 to-secondary-600 text-brand-50 hover:from-accent-500 hover:to-secondary-500 shadow-md hover:shadow-lg",
+    secondary:
+      "bg-brand-100 text-brand-700 hover:bg-brand-200 border border-brand-300",
+    outline:
+      "border-2 border-accent-500 text-accent-600 hover:bg-accent-500 hover:text-brand-50",
+    ghost: "text-brand-600 hover:bg-brand-100 hover:text-brand-700",
+    link: "text-accent-600 underline-offset-4 hover:underline hover:text-accent-500",
+    danger:
+      "bg-danger-500 text-brand-50 hover:bg-danger-600 shadow-md hover:shadow-lg",
   },
   sizes: {
     sm: "h-8 px-3 text-sm",
