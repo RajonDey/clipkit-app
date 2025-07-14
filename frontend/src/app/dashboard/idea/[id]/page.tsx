@@ -94,52 +94,52 @@ const IdeaWorkspacePage = () => {
     return <div className="text-center text-gray-400 mt-20">Loading...</div>;
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-brand-50 to-brand-100">
+    <div className="flex min-h-screen bg-neutral-50">
       {/* Sidebar */}
       <Sidebar active="Ideas" />
       {/* Main Workspace */}
-      <main className="flex-1 flex flex-col items-center px-2 sm:px-8 py-8 bg-gradient-to-br from-brand-50 to-brand-100 min-h-screen ml-16 sm:ml-64 transition-all duration-300">
-        <div className="w-full mx-auto bg-white/90 rounded-2xl shadow-xl p-6 sm:p-10 border border-brand-100">
-          {/* Notion-style doc header */}
+      <main className="flex-1 flex flex-col items-center px-2 sm:px-8 py-8 min-h-screen ml-16 sm:ml-64 transition-all duration-300">
+        <div className="w-full mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-10 border border-neutral-200">
+          {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2 tracking-tight text-brand-900">
+            <h1 className="text-4xl font-bold mb-2 tracking-tight text-neutral-900">
               {idea.title}
             </h1>
-            <div className="text-brand-500 mb-2 text-lg">
+            <div className="text-neutral-500 mb-2 text-lg">
               {idea.description}
             </div>
             <div className="flex flex-wrap gap-2 mb-2">
               {idea.tags.map((tag: string) => (
                 <span
                   key={tag}
-                  className="px-2 py-1 text-xs rounded bg-accent-100 text-accent-700 font-medium"
+                  className="px-2 py-1 text-xs rounded bg-neutral-100 text-neutral-700 font-medium border border-neutral-200"
                 >
                   #{tag}
                 </span>
               ))}
             </div>
             <div className="flex gap-2 mt-2">
-              <button className="px-4 py-2 rounded bg-brand-100 hover:bg-brand-200 text-brand-700">
+              <button className="px-4 py-2 rounded border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-700 font-medium transition-all">
                 Edit
               </button>
-              <button className="px-4 py-2 rounded bg-secondary-700 hover:bg-secondary-600 text-white">
+              <button className="px-4 py-2 rounded border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-700 font-medium transition-all">
                 Delete
               </button>
-              <button className="px-4 py-2 rounded bg-gradient-to-r from-accent-600 to-secondary-600 hover:from-accent-500 hover:to-secondary-500 text-white">
+              <button className="px-4 py-2 rounded bg-orange-500 hover:bg-orange-600 text-white font-medium transition-all">
                 Generate AI
               </button>
             </div>
           </div>
-          {/* Notion-style doc body: organized by content type, but simple and clean */}
+          {/* Tabs and Clips */}
           <div className="mb-8">
-            <nav className="flex gap-2 border-b border-brand-200 pb-2 mb-4 overflow-x-auto">
+            <nav className="flex gap-2 border-b border-neutral-200 pb-2 mb-4 overflow-x-auto">
               {contentTypes.map((tab) => (
                 <button
                   key={tab.value}
                   className={`px-4 py-2 rounded-t-lg font-medium transition-all ${
                     activeTab === tab.value
-                      ? "bg-brand-100 text-accent-700"
-                      : "hover:bg-brand-100 text-brand-500"
+                      ? "bg-orange-50 text-orange-700 border-b-2 border-orange-500"
+                      : "hover:bg-neutral-100 text-neutral-500"
                   }`}
                   onClick={() => setActiveTab(tab.value)}
                 >
@@ -149,7 +149,7 @@ const IdeaWorkspacePage = () => {
             </nav>
             <section>
               {filteredClips.length === 0 ? (
-                <div className="text-brand-400 text-center py-8">
+                <div className="text-neutral-400 text-center py-8">
                   No clips yet. Add your first clip!
                 </div>
               ) : (
@@ -157,9 +157,9 @@ const IdeaWorkspacePage = () => {
                   {filteredClips.map((clip) => (
                     <div
                       key={clip.id}
-                      className="group relative flex gap-4 items-start p-4 rounded-xl hover:bg-brand-50 transition-all border border-brand-100"
+                      className="group relative flex gap-4 items-start p-4 rounded-xl hover:bg-neutral-50 transition-all border border-neutral-200 shadow-sm"
                     >
-                      <span className="text-2xl mt-1">
+                      <span className="text-2xl mt-1 select-none">
                         {clip.type === "text" && "📝"}
                         {clip.type === "link" && "🔗"}
                         {clip.type === "image" && "🖼️"}
@@ -180,7 +180,7 @@ const IdeaWorkspacePage = () => {
                             className="h-24 rounded shadow bg-black"
                           />
                         ) : clip.type === "code" ? (
-                          <pre className="overflow-x-auto text-xs p-2 rounded bg-brand-900 text-green-200 font-mono">
+                          <pre className="overflow-x-auto text-xs p-2 rounded bg-neutral-900 text-orange-200 font-mono">
                             <code>{clip.content}</code>
                           </pre>
                         ) : clip.type === "link" ? (
@@ -188,12 +188,12 @@ const IdeaWorkspacePage = () => {
                             href={clip.content}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="underline text-accent-600 hover:text-accent-800 break-all"
+                            className="underline text-orange-600 hover:text-orange-800 break-all"
                           >
                             {clip.content}
                           </a>
                         ) : (
-                          <div className="whitespace-pre-line text-brand-800 text-base">
+                          <div className="whitespace-pre-line text-neutral-800 text-base">
                             {clip.content}
                           </div>
                         )}
@@ -202,17 +202,17 @@ const IdeaWorkspacePage = () => {
                             clip.tags.map((tag: string) => (
                               <span
                                 key={tag}
-                                className="px-2 py-0.5 text-xs rounded bg-accent-50 text-accent-700"
+                                className="px-2 py-0.5 text-xs rounded bg-neutral-100 text-neutral-700 border border-neutral-200"
                               >
                                 #{tag}
                               </span>
                             ))}
                         </div>
-                        <span className="text-xs text-brand-400 mt-1 block">
+                        <span className="text-xs text-neutral-400 mt-1 block">
                           {clip.created}
                         </span>
                       </div>
-                      <button className="ml-2 text-secondary-400 hover:text-secondary-700 text-lg absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
+                      <button className="ml-2 text-neutral-400 hover:text-orange-500 text-lg absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition">
                         ×
                       </button>
                     </div>
@@ -221,11 +221,11 @@ const IdeaWorkspacePage = () => {
               )}
             </section>
           </div>
-          {/* Add Clip section (Notion-style, subtle) */}
+          {/* Add Clip section */}
           <section className="mt-10">
             <div className="flex flex-col sm:flex-row gap-2 items-center">
               <select
-                className="border rounded px-2 py-2 text-sm text-brand-900"
+                className="border border-neutral-200 rounded px-2 py-2 text-sm text-neutral-900 bg-white"
                 value={clipType}
                 onChange={(e) => setClipType(e.target.value)}
               >
@@ -238,7 +238,7 @@ const IdeaWorkspacePage = () => {
                   ))}
               </select>
               <input
-                className="flex-1 px-3 py-2 border rounded text-brand-900"
+                className="flex-1 px-3 py-2 border border-neutral-200 rounded text-neutral-900 bg-white"
                 placeholder={
                   clipType === "text"
                     ? "Add a note..."
@@ -256,14 +256,14 @@ const IdeaWorkspacePage = () => {
                 onChange={(e) => setNewClip(e.target.value)}
               />
               <input
-                className="px-2 py-2 border rounded text-brand-900"
+                className="px-2 py-2 border border-neutral-200 rounded text-neutral-900 bg-white"
                 placeholder="Tag (optional)"
                 value={clipTag}
                 onChange={(e) => setClipTag(e.target.value)}
               />
               <button
                 onClick={handleAddClip}
-                className="px-4 py-2 rounded bg-gradient-to-r from-accent-600 to-secondary-600 text-white font-medium hover:from-accent-500 hover:to-secondary-500 transition-all"
+                className="px-4 py-2 rounded bg-orange-500 hover:bg-orange-600 text-white font-medium transition-all"
               >
                 Add
               </button>

@@ -71,16 +71,14 @@ export default function DashboardPage() {
   const renderIdeas = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {/* Add New Idea Card */}
-      <motion.button
-        whileHover={{
-          scale: 1.02,
-          boxShadow: "0 8px 30px 0 rgba(0,0,0,0.09)",
-        }}
-        whileTap={{ scale: 0.98 }}
+      <Button
         onClick={openNewIdea}
-        className="flex flex-col items-center justify-center border border-dashed border-accent-300 rounded-2xl p-8 h-56 bg-gradient-to-br from-accent-50/80 to-secondary-50/80 text-accent-600 hover:from-accent-100 hover:to-secondary-100 transition-all cursor-pointer shadow-sm"
+        variant="primary"
+        size="lg"
+        className="flex flex-col items-center justify-center border-2 border-dashed border-orange-200 rounded-2xl p-8 h-56 bg-white text-orange-600 hover:bg-orange-50 transition-all cursor-pointer shadow-md group relative overflow-hidden"
       >
-        <div className="bg-white/70 rounded-full p-3 mb-3 shadow-sm">
+        <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-orange-400 to-orange-200 opacity-70 group-hover:opacity-100 transition-all rounded-l-2xl" />
+        <div className="bg-white rounded-full p-3 mb-3 shadow-sm z-10">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -91,50 +89,52 @@ export default function DashboardPage() {
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-accent-600"
+            className="text-orange-500"
           >
             <path d="M5 12h14" />
             <path d="M12 5v14" />
           </svg>
         </div>
-        <span className="font-semibold text-lg">Start a New Idea</span>
-        <span className="text-xs mt-2 text-accent-500">
+        <span className="font-semibold text-lg z-10">Start a New Idea</span>
+        <span className="text-xs mt-2 text-orange-400 z-10">
           Collect, organize, and create!
         </span>
-      </motion.button>
+      </Button>
       {/* Idea Cards */}
       {ideas.map((idea) => (
         <motion.div
           key={idea.id}
-          whileHover={{ y: -4, boxShadow: "0 8px 30px 0 rgba(0,0,0,0.09)" }}
-          className="relative flex flex-col rounded-2xl bg-white p-6 shadow-sm hover:shadow-xl transition-all cursor-pointer"
+          whileHover={{ y: -6, boxShadow: "0 8px 32px 0 rgba(0,0,0,0.10)" }}
+          className="relative flex flex-col rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all cursor-pointer border border-neutral-200 hover:border-orange-300 group overflow-hidden"
           onClick={() => openEditIdea(idea)}
         >
-          <div className="flex items-center gap-2 mb-2">
+          {/* Vertical accent bar */}
+          <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-orange-400 to-orange-200 opacity-70 group-hover:opacity-100 transition-all rounded-l-2xl" />
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             {idea.tags.map((tag: string) => (
               <span
                 key={tag}
-                className="px-2 py-1 text-xs rounded-md bg-accent-100 text-accent-700 font-medium mr-1"
+                className="px-2 py-1 text-xs rounded bg-neutral-100 text-neutral-700 font-medium border border-neutral-200"
               >
                 #{tag}
               </span>
             ))}
           </div>
-          <h2 className="font-bold text-xl mb-1 text-brand-900 truncate">
+          <h2 className="font-bold text-xl mb-1 text-neutral-900 truncate">
             {idea.title}
           </h2>
-          <p className="text-brand-500 text-sm mb-3 line-clamp-2">
+          <p className="text-neutral-500 text-sm mb-3 line-clamp-2">
             {idea.description}
           </p>
           <div className="flex flex-wrap gap-2 mt-auto">
             {idea.clips.slice(0, 2).map((clip: any) => (
               <span
                 key={clip.id}
-                className="inline-flex items-center px-2 py-1 text-xs rounded-md bg-secondary-100 text-secondary-700 gap-1"
+                className="inline-flex items-center px-2 py-1 text-xs rounded bg-neutral-50 text-neutral-700 gap-1 border border-neutral-200"
               >
                 {clip.type === "text" && (
                   <svg
-                    className="w-3 h-3"
+                    className="w-3 h-3 text-orange-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                 )}
                 {clip.type === "link" && (
                   <svg
-                    className="w-3 h-3"
+                    className="w-3 h-3 text-blue-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -163,7 +163,7 @@ export default function DashboardPage() {
                 )}
                 {clip.type === "image" && (
                   <svg
-                    className="w-3 h-3"
+                    className="w-3 h-3 text-blue-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -183,7 +183,7 @@ export default function DashboardPage() {
               </span>
             ))}
             {idea.clips.length > 2 && (
-              <span className="inline-flex items-center px-2 py-1 text-xs rounded-md bg-brand-100 text-brand-500">
+              <span className="inline-flex items-center px-2 py-1 text-xs rounded bg-orange-50 text-orange-500 border border-orange-100">
                 +{idea.clips.length - 2} more
               </span>
             )}
@@ -194,17 +194,21 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-brand-50 to-brand-100">
+    <div className="flex min-h-screen bg-neutral-50 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-orange-50 via-yellow-50 to-white">
       {/* Sidebar */}
       <Sidebar active={active} />
       {/* Main Content */}
       <main className="flex-1 flex flex-col p-8 ml-16 sm:ml-64 transition-all duration-300">
         <header className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-brand-900 via-accent-800 to-secondary-700">
+          <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-900 via-yellow-700 to-blue-700">
             {active}
           </h1>
           {active === "Ideas" && (
-            <Button onClick={openNewIdea} size="md" className="shadow-md">
+            <Button
+              onClick={openNewIdea}
+              size="md"
+              className="shadow-md bg-gradient-to-r from-orange-400 to-yellow-300 hover:from-orange-500 hover:to-yellow-400"
+            >
               + New Idea
             </Button>
           )}
@@ -213,7 +217,7 @@ export default function DashboardPage() {
           {active === "Ideas" ? (
             renderIdeas()
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-brand-400">
+            <div className="flex flex-col items-center justify-center h-full text-blue-400">
               <span className="text-5xl mb-4">🚧</span>
               <p className="text-lg">{active} section coming soon!</p>
             </div>
@@ -228,15 +232,15 @@ export default function DashboardPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-brand-900/30 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
             onClick={closeModal}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
+              initial={{ scale: 0.97, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              exit={{ scale: 0.97, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="relative bg-brand-50 rounded-2xl shadow-2xl p-8 w-full max-w-2xl mx-4 border-0 drop-shadow-xl"
+              className="relative bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl mx-4 border border-neutral-200"
               onClick={(e) => e.stopPropagation()}
             >
               <IdeaWorkspace
@@ -314,20 +318,29 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <input
-          className="flex-1 text-2xl font-bold border-0 border-b-2 border-accent-100 focus:border-accent-400 outline-none bg-transparent transition-all shadow-none"
+          className="flex-1 text-2xl font-bold border-0 border-b-2 border-neutral-200 focus:border-orange-400 outline-none bg-transparent transition-all shadow-none"
           placeholder="Idea Title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <Button onClick={onCancel} variant="secondary" size="sm">
+        <Button
+          onClick={onCancel}
+          variant="secondary"
+          size="sm"
+          className="text-neutral-600 border border-neutral-200 bg-white hover:bg-neutral-100"
+        >
           Cancel
         </Button>
-        <Button onClick={handleSave} size="sm">
+        <Button
+          onClick={handleSave}
+          size="sm"
+          className="bg-orange-500 text-white hover:bg-orange-600"
+        >
           Save
         </Button>
       </div>
       <textarea
-        className="w-full min-h-[60px] border-0 rounded-xl p-3 focus:ring-2 focus:ring-accent-200 focus:border-transparent transition-all bg-brand-50 text-brand-800 shadow-sm"
+        className="w-full min-h-[60px] border border-neutral-200 rounded-xl p-3 focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all bg-white text-neutral-900 shadow-sm"
         placeholder="Describe your idea..."
         value={description}
         onChange={(e) => setDescription(e.target.value)}
@@ -337,7 +350,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
         {tags.map((tag) => (
           <span
             key={tag}
-            className="px-2 py-1 text-xs rounded-md bg-accent-100 text-accent-700 font-medium flex items-center gap-1 shadow-sm border-0"
+            className="px-2 py-1 text-xs rounded-md bg-neutral-100 text-neutral-700 font-medium flex items-center gap-1 shadow-sm border border-neutral-200"
           >
             <svg
               className="w-3 h-3"
@@ -353,14 +366,14 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
             {tag}
             <button
               onClick={() => removeTag(tag)}
-              className="ml-1 text-accent-400 hover:text-accent-700 rounded-full hover:bg-accent-200 w-4 h-4 flex items-center justify-center"
+              className="ml-1 text-neutral-400 hover:text-orange-500 rounded-full hover:bg-orange-100 w-4 h-4 flex items-center justify-center"
             >
               ×
             </button>
           </span>
         ))}
         <input
-          className="px-2 py-1 text-xs border-0 rounded-md bg-brand-50 focus:ring-1 focus:ring-accent-200 focus:border-accent-200 outline-none ml-2 shadow-sm"
+          className="px-2 py-1 text-xs border border-neutral-200 rounded-md bg-white focus:ring-1 focus:ring-orange-200 focus:border-orange-400 outline-none ml-2 shadow-sm"
           placeholder="Add tag"
           value={tagInput}
           onChange={(e) => setTagInput(e.target.value)}
@@ -372,17 +385,17 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
           onClick={addTag}
           variant="secondary"
           size="sm"
-          className="text-xs px-2 py-0 h-6 rounded-md"
+          className="text-xs px-2 py-0 h-6 rounded-md text-orange-600 border border-neutral-200 bg-white hover:bg-orange-50"
         >
           Add
         </Button>
       </div>
       {/* Clips */}
       <div>
-        <div className="mb-2 font-semibold text-brand-700">Clips</div>
+        <div className="mb-2 font-semibold text-neutral-800">Clips</div>
         <div className="flex gap-2 mb-4 items-center">
           <select
-            className="border-0 rounded-md px-2 py-1 text-sm bg-brand-50 text-brand-700 focus:ring-1 focus:ring-accent-200 focus:border-accent-200 outline-none shadow-sm"
+            className="border border-neutral-200 rounded-md px-2 py-1 text-sm bg-white text-neutral-800 focus:ring-1 focus:ring-orange-200 focus:border-orange-400 outline-none shadow-sm"
             value={clipType}
             onChange={(e) => setClipType(e.target.value)}
           >
@@ -394,7 +407,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
           </select>
           {clipType === "code" && (
             <select
-              className="border-0 rounded-md px-2 py-1 text-sm bg-brand-50 text-brand-700 focus:ring-1 focus:ring-accent-200 focus:border-accent-200 outline-none shadow-sm"
+              className="border border-neutral-200 rounded-md px-2 py-1 text-sm bg-white text-neutral-800 focus:ring-1 focus:ring-orange-200 focus:border-orange-400 outline-none shadow-sm"
               value={codeLang}
               onChange={(e) => setCodeLang(e.target.value)}
             >
@@ -406,7 +419,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
             </select>
           )}
           <input
-            className="flex-1 px-3 py-1 border-0 rounded-md focus:ring-1 focus:ring-secondary-200 focus:border-secondary-200 outline-none bg-brand-50 shadow-sm"
+            className="flex-1 px-3 py-1 border border-neutral-200 rounded-md focus:ring-1 focus:ring-orange-200 focus:border-orange-400 outline-none bg-white shadow-sm"
             placeholder={
               clipType === "text"
                 ? "Add a note..."
@@ -430,38 +443,26 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
             onClick={addClip}
             variant="secondary"
             size="sm"
-            className="px-4 py-1 bg-secondary-600 text-white hover:bg-secondary-700 shadow-md"
+            className="px-4 py-1 bg-orange-500 text-white hover:bg-orange-600 shadow-md"
           >
             Add
           </Button>
         </div>
         <div className="flex flex-col gap-2">
           {clips.length === 0 && (
-            <div className="text-brand-400 text-sm">
+            <div className="text-neutral-400 text-sm">
               No clips yet. Add your first!
             </div>
           )}
           {clips.map((clip) => (
             <div
               key={clip.id}
-              className={`flex items-center gap-3 p-2 rounded-xl transition-all shadow-md border-0 ${
-                clip.type === "text"
-                  ? "bg-accent-50/80"
-                  : clip.type === "image"
-                  ? "bg-secondary-50/80"
-                  : clip.type === "video"
-                  ? "bg-brand-100/80"
-                  : clip.type === "code"
-                  ? "bg-brand-900"
-                  : clip.type === "link"
-                  ? "bg-success-50/80"
-                  : "bg-brand-100/80"
-              }`}
+              className={`flex items-center gap-3 p-2 rounded-xl transition-all shadow-md border border-neutral-200 bg-white`}
             >
               <span className="text-lg">
                 {clip.type === "text" && (
                   <svg
-                    className="w-5 h-5 text-accent-400"
+                    className="w-5 h-5 text-orange-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -477,7 +478,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
                 {clip.type === "link" && (
                   <svg
-                    className="w-5 h-5 text-success-400"
+                    className="w-5 h-5 text-blue-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -490,7 +491,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
                 {clip.type === "image" && (
                   <svg
-                    className="w-5 h-5 text-secondary-400"
+                    className="w-5 h-5 text-blue-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -504,7 +505,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
                 {clip.type === "video" && (
                   <svg
-                    className="w-5 h-5 text-brand-400"
+                    className="w-5 h-5 text-orange-400"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -517,7 +518,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
                 {clip.type === "code" && (
                   <svg
-                    className="w-5 h-5 text-green-300"
+                    className="w-5 h-5 text-blue-300"
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="none"
@@ -531,7 +532,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
               </span>
               <span
                 className={`flex-1 text-sm break-all ${
-                  clip.type === "code" ? "text-green-200 font-mono" : ""
+                  clip.type === "code" ? "text-blue-200 font-mono" : ""
                 }`}
               >
                 {clip.type === "image" ? (
@@ -564,13 +565,13 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
                 )}
               </span>
               {clip.type === "code" && clip.lang && (
-                <span className="ml-2 px-2 py-1 text-xs rounded bg-brand-800 text-brand-300 font-mono uppercase">
+                <span className="ml-2 px-2 py-1 text-xs rounded bg-blue-800 text-blue-200 font-mono uppercase">
                   {clip.lang}
                 </span>
               )}
               <button
                 onClick={() => removeClip(clip.id)}
-                className="text-secondary-400 hover:text-secondary-700 hover:bg-secondary-100 p-1 rounded-full transition-all"
+                className="text-blue-400 hover:text-blue-700 hover:bg-blue-100 p-1 rounded-full transition-all"
               >
                 <svg
                   className="w-4 h-4"
@@ -593,7 +594,7 @@ function IdeaWorkspace({ idea, onSave, onCancel }: any) {
         <Button
           variant="secondary"
           size="sm"
-          className="flex items-center gap-1 shadow-md"
+          className="flex items-center gap-1 shadow-md text-blue-700"
         >
           <svg
             className="w-3 h-3"

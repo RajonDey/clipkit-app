@@ -16,43 +16,65 @@ module.exports = {
     },
     extend: {
       colors: {
-        // ClipKit Brand Colors - Elite Dark Theme
-        brand: {
-          50: "#f8fafc", // Very light neutral
-          100: "#f1f5f9", // Light neutral
-          200: "#e2e8f0", // Light gray
-          300: "#cbd5e1", // Medium gray
-          400: "#94a3b8", // Dark gray
-          500: "#64748b", // Main dark
-          600: "#475569", // Darker
-          700: "#334155", // Very dark
-          800: "#1e293b", // Almost black
-          900: "#0f172a", // Deep black
+        // Creative Palette
+        creative: {
+          yellow: {
+            50: "#FFFBEA",
+            100: "#FFF3C4",
+            200: "#FCE588",
+            300: "#FADB5F",
+            400: "#F7C948",
+            500: "#F0B429",
+            600: "#DE911D",
+            700: "#CB6E17",
+            800: "#B44D12",
+            900: "#8D2B0B",
+          },
+          orange: {
+            50: "#FFF8F1",
+            100: "#FEECDC",
+            200: "#FFD8B5",
+            300: "#FFB385",
+            400: "#FD7E14",
+            500: "#F76707",
+            600: "#E8590C",
+            700: "#D9480F",
+            800: "#A61E4D",
+            900: "#6F1D1B",
+          },
+          blue: {
+            50: "#E3F8FF",
+            100: "#B3ECFF",
+            200: "#81DEFD",
+            300: "#5ED0FA",
+            400: "#40C3F7",
+            500: "#2BB0ED",
+            600: "#1992D4",
+            700: "#127FBF",
+            800: "#0B69A3",
+            900: "#035388",
+          },
+          neutral: {
+            50: "#FDFCFB",
+            100: "#F5F3EF",
+            200: "#EAE6DF",
+            300: "#D5CDC5",
+            400: "#B6AFA3",
+            500: "#978D7C",
+            600: "#7A6A4F",
+            700: "#5C4A1C",
+            800: "#3E2C00",
+            900: "#1A1300",
+          },
         },
-        accent: {
-          50: "#faf5ff", // Very light purple
-          100: "#f3e8ff", // Light purple
-          200: "#e9d5ff", // Light purple
-          300: "#d8b4fe", // Medium purple
-          400: "#c084fc", // Purple
-          500: "#a855f7", // Main purple
-          600: "#9333ea", // Dark purple
-          700: "#7c3aed", // Darker purple
-          800: "#6b21a8", // Very dark purple
-          900: "#581c87", // Deep purple
-        },
-        secondary: {
-          50: "#fdf2f8", // Very light pink
-          100: "#fce7f3", // Light pink
-          200: "#fbcfe8", // Light pink
-          300: "#f9a8d4", // Medium pink
-          400: "#f472b6", // Pink
-          500: "#ec4899", // Main pink
-          600: "#db2777", // Dark pink
-          700: "#be185d", // Darker pink
-          800: "#9d174d", // Very dark pink
-          900: "#831843", // Deep pink
-        },
+        // Semantic shortcuts for easy use
+        primary: "#F7C948", // creative yellow-400
+        secondary: "#FD7E14", // creative orange-400
+        accent: "#2BB0ED", // creative blue-500
+        background: "#FFFBEA", // creative yellow-50
+        surface: "#F5F3EF", // creative neutral-100
+        text: "#035388", // creative blue-900
+        muted: "#B6AFA3", // creative neutral-400
         success: {
           50: "#f0fdf4",
           500: "#22c55e",
@@ -68,31 +90,13 @@ module.exports = {
           500: "#ef4444",
           600: "#dc2626",
         },
-        // Keep existing colors for compatibility
+        // Keep existing colors for compatibility (CSS variable-based)
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",

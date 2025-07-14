@@ -120,12 +120,12 @@ export default function AuthenticationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-brand-50 to-brand-100 flex flex-col">
+    <div className="min-h-screen bg-neutral-50 flex flex-col">
       {/* Header */}
-      <header className="w-full border-b border-brand-200 bg-brand-50/80 backdrop-blur-md">
+      <header className="w-full border-b border-neutral-200 bg-white/80 backdrop-blur-md z-50 shadow-sm">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center">
-            <Link href="/" className="flex items-center group">
+            <Link href="/" className="flex items-center group cursor-pointer">
               <motion.div
                 whileHover={{ rotate: 180 }}
                 transition={{ duration: 0.3 }}
@@ -139,12 +139,12 @@ export default function AuthenticationPage() {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-8 w-8 text-accent-600 group-hover:text-accent-500 transition-colors"
+                  className="h-8 w-8 text-orange-400 group-hover:text-orange-500 transition-colors"
                 >
                   <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
                 </svg>
               </motion.div>
-              <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-accent-600 to-secondary-600 group-hover:from-accent-500 group-hover:to-secondary-500 transition-all duration-300">
+              <span className="text-xl font-bold text-neutral-900 group-hover:text-orange-500 transition-all duration-300">
                 ClipKit
               </span>
             </Link>
@@ -160,13 +160,13 @@ export default function AuthenticationPage() {
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          <div className="bg-brand-50 p-8 rounded-2xl shadow-xl border border-brand-200">
+          <div className="bg-white p-8 rounded-2xl shadow-xl border border-neutral-200">
             <div className="text-center mb-8">
               <motion.h2
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
-                className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-brand-800 via-accent-700 to-accent-800"
+                className="text-2xl font-bold tracking-tight text-neutral-900"
               >
                 {isLogin ? "Welcome back" : "Create your account"}
               </motion.h2>
@@ -174,7 +174,7 @@ export default function AuthenticationPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="mt-2 text-brand-600"
+                className="mt-2 text-neutral-500"
               >
                 {isLogin
                   ? "Enter your details to access your account"
@@ -191,8 +191,8 @@ export default function AuthenticationPage() {
                 <div
                   className={`mb-4 p-3 text-sm rounded-lg ${
                     error.includes("successful")
-                      ? "text-success-600 bg-success-50"
-                      : "text-danger-500 bg-danger-50"
+                      ? "text-green-600 bg-green-50"
+                      : "text-red-500 bg-red-50"
                   }`}
                 >
                   {error}
@@ -202,7 +202,7 @@ export default function AuthenticationPage() {
               <form className="space-y-4" onSubmit={handleSubmit}>
                 {!isLogin && (
                   <div>
-                    <label className="block text-sm font-medium text-brand-700 mb-1">
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
                       Name
                     </label>
                     <input
@@ -210,14 +210,14 @@ export default function AuthenticationPage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all bg-brand-50"
+                      className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:shadow-[0_0_0_2px_rgba(255,140,0,0.15)] transition-all bg-neutral-50 outline-none"
                       placeholder="John Doe"
                       required={!isLogin}
                     />
                   </div>
                 )}
                 <div>
-                  <label className="block text-sm font-medium text-brand-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
                     Email
                   </label>
                   <input
@@ -225,13 +225,13 @@ export default function AuthenticationPage() {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all bg-brand-50"
+                    className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:shadow-[0_0_0_2px_rgba(255,140,0,0.15)] transition-all bg-neutral-50 outline-none"
                     placeholder="you@example.com"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-brand-700 mb-1">
+                  <label className="block text-sm font-medium text-neutral-700 mb-1">
                     Password
                   </label>
                   <input
@@ -239,7 +239,7 @@ export default function AuthenticationPage() {
                     name="password"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-brand-300 rounded-lg focus:ring-2 focus:ring-accent-500 focus:border-transparent transition-all bg-brand-50"
+                    className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent focus:shadow-[0_0_0_2px_rgba(255,140,0,0.15)] transition-all bg-neutral-50 outline-none"
                     placeholder="••••••••"
                     required
                   />
@@ -247,14 +247,13 @@ export default function AuthenticationPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 px-4 bg-gradient-to-r from-accent-600 to-secondary-600 text-brand-50 rounded-lg font-medium 
-                    hover:from-accent-500 hover:to-secondary-500 focus:outline-none focus:ring-2 focus:ring-accent-500 
-                    focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 px-4 bg-gradient-to-r from-orange-400 to-yellow-300 bg-[length:200%_100%] bg-left hover:bg-right hover:from-orange-500 hover:to-yellow-400 text-white rounded-lg font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-[background-position,background-color] duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm cursor-pointer"
+                  style={{ cursor: isLoading ? "not-allowed" : "pointer" }}
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center">
                       <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-brand-50"
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -284,17 +283,17 @@ export default function AuthenticationPage() {
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-brand-200"></div>
+                    <div className="w-full border-t border-neutral-200"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-brand-50 text-brand-500">
+                    <span className="px-2 bg-white text-neutral-400">
                       Or continue with
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-2 gap-4">
-                  <button className="flex items-center justify-center px-4 py-2 border border-brand-300 rounded-lg hover:bg-brand-100 transition-all">
+                  <button className="flex items-center justify-center px-4 py-2 border border-neutral-200 rounded-lg hover:bg-neutral-100 transition-all cursor-pointer">
                     <svg className="h-5 w-5" viewBox="0 0 24 24">
                       <path
                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -314,9 +313,9 @@ export default function AuthenticationPage() {
                       />
                     </svg>
                   </button>
-                  <button className="flex items-center justify-center px-4 py-2 border border-brand-300 rounded-lg hover:bg-brand-100 transition-all">
+                  <button className="flex items-center justify-center px-4 py-2 border border-neutral-200 rounded-lg hover:bg-neutral-100 transition-all cursor-pointer">
                     <svg
-                      className="h-5 w-5"
+                      className="h-5 w-5 text-blue-500"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -329,7 +328,7 @@ export default function AuthenticationPage() {
               <div className="mt-6 text-center">
                 <button
                   onClick={() => setIsLogin(!isLogin)}
-                  className="text-sm text-brand-600 hover:text-accent-600 transition-colors"
+                  className="text-sm text-orange-500 hover:text-orange-600 transition-colors cursor-pointer"
                 >
                   {isLogin
                     ? "Don't have an account? Sign up"
