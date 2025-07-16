@@ -6,8 +6,8 @@ import Sidebar from "@/components/layout/Sidebar";
 import { Idea, Clip, ClipType, ContentTypeOption } from "@/types/idea";
 import { ClipModal } from "@/components/clips/ClipModal";
 import { ClipSection } from "@/components/clips/ClipSection";
-import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
-import { AddClipModal } from "@/components/clips/AddClipModal";
+import { AddClipForm } from "@/components/clips/AddClipForm";
+import { buttonStyles } from "@/styles/tokens";
 
 // Dummy data for mockup (replace with API fetch)
 const mockIdeas: Idea[] = [
@@ -34,7 +34,7 @@ const mockIdeas: Idea[] = [
       {
         id: 3,
         type: "image",
-        content: "https://picsum.photos/200/100", // Updated valid dummy image URL
+        content: "https://source.unsplash.com/random/200x100",
         created: "2025-07-10",
         tags: [],
       },
@@ -45,13 +45,6 @@ const mockIdeas: Idea[] = [
         lang: "js",
         created: "2025-07-10",
         tags: ["snippet"],
-      },
-      {
-        id: 5,
-        type: "video",
-        content: "https://www.w3schools.com/html/mov_bbb.mp4", // Added valid dummy video URL
-        created: "2025-07-10",
-        tags: ["demo"],
       },
     ],
   },
@@ -86,9 +79,6 @@ export default function Page() {
 
   // Modal for previewing/editing a clip
   const [selectedClipId, setSelectedClipId] = useState<number | null>(null);
-
-  // Modal for adding a new clip
-  const [showAddClipModal, setShowAddClipModal] = useState(false);
 
   useEffect(() => {
     // Replace with API fetch
@@ -243,9 +233,13 @@ export default function Page() {
                 {/* Actions dropdown */}
                 <div className="relative flex gap-2 mt-2 md:mt-0">
                   <div className="group">
-                    <button className="flex items-center gap-2">
+                    <button
+                      className={
+                        buttonStyles.outline + " flex items-center gap-2"
+                      }
+                    >
                       <span className="text-lg">⚙️</span>
-                      <span className="hidden sm:inline">Organize Clips</span>
+                      <span className="hidden sm:inline">Actions</span>
                     </button>
                     <div className="absolute right-0 mt-0 z-10 hidden group-hover:block bg-white border border-orange-200 rounded shadow-xl min-w-[180px]">
                       <button
@@ -262,31 +256,24 @@ export default function Page() {
                       </button>
                       <button
                         className="w-full text-left px-4 py-2 bg-white hover:bg-orange-50 text-orange-600 flex items-center gap-2 rounded-b-xl transition whitespace-nowrap"
-                        title="Generate Final Content"
+                        title="Generate Content with AI"
                       >
-                        <span className="text-lg">🤖</span> Generate Final
-                        Content
+                        <span className="text-lg">🤖</span> Generate Content
+                        with AI
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Add Clip section in header - replaced with a simplified indicator */}
-              <div className="text-center py-3 bg-orange-50 rounded-xl border border-orange-100 shadow-sm flex items-center justify-center gap-2">
-                <span className="text-orange-600">
-                  Add clips to organize your ideas
-                </span>
-                <button
-                  className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-                  onClick={() => setShowAddClipModal(true)}
-                >
-                  Open Clip Editor
-                </button>
-              </div>
+              {/* Add Clip section in header */}
+              <AddClipForm
+                contentTypes={contentTypes.filter((t) => t.value !== "all")}
+                onAddClip={handleAddClip}
+              />
 
               <div className="text-xs text-neutral-400 mt-2">
-                Tip: Use the + button in the corner to quickly add a clip.
+                Tip: Use <kbd>Ctrl+Enter</kbd> to quickly add a clip.
               </div>
             </div>
 
@@ -355,18 +342,6 @@ export default function Page() {
         <ClipModal
           clip={clips.find((c) => c.id === selectedClipId)!}
           onClose={() => setSelectedClipId(null)}
-        />
-      )}
-
-      {/* Floating action button for adding clips */}
-      <FloatingActionButton onClick={() => setShowAddClipModal(true)} />
-
-      {/* Modal for adding a new clip */}
-      {showAddClipModal && (
-        <AddClipModal
-          contentTypes={contentTypes.filter((t) => t.value !== "all")}
-          onAddClip={handleAddClip}
-          onClose={() => setShowAddClipModal(false)}
         />
       )}
     </div>

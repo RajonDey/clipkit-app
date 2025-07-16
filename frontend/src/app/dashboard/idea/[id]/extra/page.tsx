@@ -6,8 +6,8 @@ import Sidebar from "@/components/layout/Sidebar";
 import { Idea, Clip, ClipType, ContentTypeOption } from "@/types/idea";
 import { ClipModal } from "@/components/clips/ClipModal";
 import { ClipSection } from "@/components/clips/ClipSection";
-import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
-import { AddClipModal } from "@/components/clips/AddClipModal";
+import { AddClipForm } from "@/components/clips/AddClipForm";
+import { buttonStyles } from "@/styles/tokens";
 
 // Dummy data for mockup (replace with API fetch)
 const mockIdeas: Idea[] = [
@@ -34,7 +34,7 @@ const mockIdeas: Idea[] = [
       {
         id: 3,
         type: "image",
-        content: "https://picsum.photos/200/100", // Updated valid dummy image URL
+        content: "https://source.unsplash.com/random/200x100",
         created: "2025-07-10",
         tags: [],
       },
@@ -45,13 +45,6 @@ const mockIdeas: Idea[] = [
         lang: "js",
         created: "2025-07-10",
         tags: ["snippet"],
-      },
-      {
-        id: 5,
-        type: "video",
-        content: "https://www.w3schools.com/html/mov_bbb.mp4", // Added valid dummy video URL
-        created: "2025-07-10",
-        tags: ["demo"],
       },
     ],
   },
@@ -71,24 +64,21 @@ const contentTypes: ContentTypeOption[] = [
  */
 export default function Page() {
   const params = useParams();
-  const ideaId = (params?.id as string) || "1";
+  const ideaId = params?.id as string || "1";
   const [idea, setIdea] = useState<Idea | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | ClipType>("all");
   const [clips, setClips] = useState<Clip[]>([]);
-
+  
   // Editable title
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
-
+  
   // Add tag
   const [showTagInput, setShowTagInput] = useState(false);
   const [newTag, setNewTag] = useState("");
 
   // Modal for previewing/editing a clip
   const [selectedClipId, setSelectedClipId] = useState<number | null>(null);
-
-  // Modal for adding a new clip
-  const [showAddClipModal, setShowAddClipModal] = useState(false);
 
   useEffect(() => {
     // Replace with API fetch
@@ -122,7 +112,9 @@ export default function Page() {
    * Updates the content of a clip
    */
   const handleClipContentChange = (clipId: number, content: string) => {
-    setClips(clips.map((c) => (c.id === clipId ? { ...c, content } : c)));
+    setClips(
+      clips.map((c) => (c.id === clipId ? { ...c, content } : c))
+    );
   };
 
   /**
@@ -139,7 +131,7 @@ export default function Page() {
     <div className="flex min-h-screen bg-neutral-50">
       {/* Sidebar */}
       <Sidebar active="Ideas" />
-
+      
       {/* Main Workspace Split Pane */}
       <main className="flex-1 flex flex-row min-h-screen ml-16 sm:ml-64 transition-all duration-300">
         {/* Left Pane: Idea details, tabs, clips, add clip */}
@@ -243,9 +235,9 @@ export default function Page() {
                 {/* Actions dropdown */}
                 <div className="relative flex gap-2 mt-2 md:mt-0">
                   <div className="group">
-                    <button className="flex items-center gap-2">
+                    <button className={buttonStyles.outline + " flex items-center gap-2"}>
                       <span className="text-lg">⚙️</span>
-                      <span className="hidden sm:inline">Organize Clips</span>
+                      <span className="hidden sm:inline">Actions</span>
                     </button>
                     <div className="absolute right-0 mt-0 z-10 hidden group-hover:block bg-white border border-orange-200 rounded shadow-xl min-w-[180px]">
                       <button
@@ -262,34 +254,27 @@ export default function Page() {
                       </button>
                       <button
                         className="w-full text-left px-4 py-2 bg-white hover:bg-orange-50 text-orange-600 flex items-center gap-2 rounded-b-xl transition whitespace-nowrap"
-                        title="Generate Final Content"
+                        title="Generate Content with AI"
                       >
-                        <span className="text-lg">🤖</span> Generate Final
-                        Content
+                        <span className="text-lg">🤖</span> Generate Content
+                        with AI
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Add Clip section in header - replaced with a simplified indicator */}
-              <div className="text-center py-3 bg-orange-50 rounded-xl border border-orange-100 shadow-sm flex items-center justify-center gap-2">
-                <span className="text-orange-600">
-                  Add clips to organize your ideas
-                </span>
-                <button
-                  className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-                  onClick={() => setShowAddClipModal(true)}
-                >
-                  Open Clip Editor
-                </button>
-              </div>
-
+              
+              {/* Add Clip section in header */}
+              <AddClipForm 
+                contentTypes={contentTypes.filter(t => t.value !== 'all')} 
+                onAddClip={handleAddClip}
+              />
+              
               <div className="text-xs text-neutral-400 mt-2">
-                Tip: Use the + button in the corner to quickly add a clip.
+                Tip: Use <kbd>Ctrl+Enter</kbd> to quickly add a clip.
               </div>
             </div>
-
+            
             {/* Tabs and Clips */}
             <div className="mb-8">
               <nav className="flex gap-2 border-b border-neutral-200 pb-2 mb-4 overflow-x-auto">
@@ -307,7 +292,7 @@ export default function Page() {
                   </button>
                 ))}
               </nav>
-
+              
               <section>
                 {filteredClips.length === 0 ? (
                   <div className="text-neutral-400 text-center py-8">
@@ -315,9 +300,7 @@ export default function Page() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-6">
-                    {(
-                      ["text", "image", "link", "code", "video"] as ClipType[]
-                    ).map((type) => (
+                    {(["text", "image", "link", "code", "video"] as ClipType[]).map((type) => (
                       <ClipSection
                         key={type}
                         type={type}
@@ -334,7 +317,7 @@ export default function Page() {
             </div>
           </div>
         </section>
-
+        
         {/* Right Pane: AI/content editor area */}
         <aside className="hidden md:flex flex-col w-1/2 xl:w-1/3 border-l border-neutral-200 bg-white/80 backdrop-blur-lg p-8 min-h-screen">
           <div className="flex-1 flex flex-col items-center justify-center w-full h-full">
@@ -353,20 +336,8 @@ export default function Page() {
       {/* Modal for clip preview/edit */}
       {selectedClipId && (
         <ClipModal
-          clip={clips.find((c) => c.id === selectedClipId)!}
+          clip={clips.find(c => c.id === selectedClipId)!}
           onClose={() => setSelectedClipId(null)}
-        />
-      )}
-
-      {/* Floating action button for adding clips */}
-      <FloatingActionButton onClick={() => setShowAddClipModal(true)} />
-
-      {/* Modal for adding a new clip */}
-      {showAddClipModal && (
-        <AddClipModal
-          contentTypes={contentTypes.filter((t) => t.value !== "all")}
-          onAddClip={handleAddClip}
-          onClose={() => setShowAddClipModal(false)}
         />
       )}
     </div>
