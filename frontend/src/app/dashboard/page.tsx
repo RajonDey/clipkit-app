@@ -1,48 +1,38 @@
 "use client";
 
-import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
-import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import * as api from "@/lib/api";
+import axios from "axios";
 
-// Sidebar links are now defined in the Sidebar component
+// Define types
+interface Idea {
+  id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  clips: Clip[];
+}
 
-// Placeholder ideas data
-const initialIdeas = [
-  {
-    id: 1,
-    title: "My First Article Idea",
-    description: "A creative article about productivity hacks for creators.",
-    tags: ["productivity", "creativity"],
-    clips: [
-      { id: 1, type: "text", content: "Clip: Top 5 productivity tools." },
-      { id: 2, type: "link", content: "https://zenhabits.net/" },
-    ],
-  },
-  {
-    id: 2,
-    title: "YouTube Script: AI Tools Review",
-    description: "A video script reviewing the best AI tools for 2025.",
-    tags: ["video", "ai", "review"],
-    clips: [
-      { id: 1, type: "text", content: "Intro: Why AI tools matter." },
-      {
-        id: 2,
-        type: "image",
-        content: "https://source.unsplash.com/random/200x100",
-      },
-    ],
-  },
-];
+interface Clip {
+  id: number;
+  type: string;
+  content: string;
+}
+
+// Empty initial state - will be populated from API
+const initialIdeas: Idea[] = [];
 
 export default function DashboardPage() {
   const [active, setActive] = useState("Ideas");
-  const [ideas, setIdeas] = useState(initialIdeas);
+  const [ideas, setIdeas] = useState<Idea[]>(initialIdeas);
   const [showModal, setShowModal] = useState(false);
-  const [editingIdea, setEditingIdea] = useState(null);
+  const [editingIdea, setEditingIdea] = useState<Idea | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   // Handlers
@@ -50,148 +40,233 @@ export default function DashboardPage() {
     setEditingIdea(null);
     setShowModal(true);
   };
-  // Change: Instead of opening modal, navigate to workspace page
-  const openEditIdea = (idea: any) => {
+
+  // Change: Navigate to workspace page with the correct UUID
+  const openEditIdea = (idea: Idea) => {
     router.push(`/dashboard/idea/${idea.id}`);
   };
+
   const closeModal = () => {
     setShowModal(false);
     setEditingIdea(null);
   };
-  const saveIdea = (idea: any) => {
-    if (idea.id) {
-      setIdeas(ideas.map((i) => (i.id === idea.id ? idea : i)));
+
+  interface IdeaFormData {
+    id?: string;
+    title: string;
+    description: string;
+    tags: string[];
+  }
+
+  const saveIdea = (ideaData: IdeaFormData) => {
+    if (ideaData.id) {
+      setIdeas(
+        ideas.map((i) => (i.id === ideaData.id ? { ...i, ...ideaData } : i))
+      );
     } else {
-      setIdeas([...ideas, { ...idea, id: Date.now(), clips: [] }]);
+      // Create new idea through API
+      api.ideas
+        .create({
+          name: ideaData.title,
+          category: ideaData.description,
+          tags: ideaData.tags,
+        })
+        .then((response) => {
+          // Navigate to the new idea
+          router.push(`/dashboard/idea/${response.id}`);
+        })
+        .catch((error) => {
+          console.error("Error creating idea:", error);
+        });
     }
     closeModal();
   };
 
+  // Fetch ideas from API when component mounts
+  useEffect(() => {
+    const fetchIdeas = async () => {
+      try {
+        setLoading(true);
+        // Check for token first
+        if (typeof window !== "undefined" && !localStorage.getItem("token")) {
+          console.log("No authentication token found, redirecting to login");
+          router.push("/auth");
+          return;
+        }
+
+        const response = await api.ideas.getAll();
+        console.log("Ideas fetched:", response);
+
+        // Transform API data to match frontend model
+        const transformedIdeas = response.map((idea: any) => ({
+          id: idea.id,
+          title: idea.name,
+          description: idea.category || "No description",
+          tags: idea.tags || [],
+          clips: [], // We'll show clip count later
+        }));
+
+        setIdeas(transformedIdeas);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching ideas:", err);
+
+        if (axios.isAxiosError(err)) {
+          if (err.response?.status === 401 || err.response?.status === 403) {
+            console.log("Authentication error, redirecting to login");
+            if (typeof window !== "undefined") {
+              localStorage.removeItem("token"); // Clear invalid token
+            }
+            router.push("/auth");
+            return;
+          }
+
+          const detail = err.response?.data?.detail || "Unknown server error";
+          setError(`Server error: ${detail}`);
+        } else {
+          setError(
+            `Failed to load ideas: ${
+              err instanceof Error ? err.message : "Unknown error"
+            }`
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIdeas();
+  }, [router]);
+
   // Main content for Ideas
-  const renderIdeas = () => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {/* Add New Idea Card */}
-      <Button
-        onClick={openNewIdea}
-        variant="primary"
-        size="lg"
-        className="flex flex-col items-center justify-center border-2 border-dashed border-orange-200 rounded-2xl p-8 h-56 bg-white text-orange-600 hover:bg-orange-50 transition-all cursor-pointer shadow-md group relative overflow-hidden"
-      >
-        <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-orange-400 to-orange-200 opacity-70 group-hover:opacity-100 transition-all rounded-l-2xl" />
-        <div className="bg-white rounded-full p-3 mb-3 shadow-sm z-10">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-orange-500"
-          >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-          </svg>
+  const renderIdeas = () => {
+    if (loading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="relative flex flex-col rounded-2xl bg-white p-6 shadow-md border border-neutral-200 h-56 animate-pulse"
+            >
+              <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-gray-200 to-gray-100 rounded-l-2xl" />
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <div className="w-16 h-4 bg-gray-200 rounded-md"></div>
+                <div className="w-20 h-4 bg-gray-200 rounded-md"></div>
+              </div>
+              <div className="w-3/4 h-6 bg-gray-200 rounded-md mb-2"></div>
+              <div className="w-full h-12 bg-gray-200 rounded-md mb-4"></div>
+              <div className="mt-auto flex gap-2">
+                <div className="w-24 h-5 bg-gray-200 rounded-md"></div>
+                <div className="w-24 h-5 bg-gray-200 rounded-md"></div>
+              </div>
+            </div>
+          ))}
         </div>
-        <span className="font-semibold text-lg z-10">Start a New Idea</span>
-        <span className="text-xs mt-2 text-orange-400 z-10">
-          Collect, organize, and create!
-        </span>
-      </Button>
-      {/* Idea Cards */}
-      {ideas.map((idea) => (
-        <motion.div
-          key={idea.id}
-          whileHover={{ y: -6, boxShadow: "0 8px 32px 0 rgba(0,0,0,0.10)" }}
-          className="relative flex flex-col rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all cursor-pointer border border-neutral-200 hover:border-orange-300 group overflow-hidden"
-          onClick={() => openEditIdea(idea)}
-        >
-          {/* Vertical accent bar */}
-          <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-orange-400 to-orange-200 opacity-70 group-hover:opacity-100 transition-all rounded-l-2xl" />
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            {idea.tags.map((tag: string) => (
-              <span
-                key={tag}
-                className="px-2 py-1 text-xs rounded bg-neutral-100 text-neutral-700 font-medium border border-neutral-200"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-          <h2 className="font-bold text-xl mb-1 text-neutral-900 truncate">
-            {idea.title}
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-neutral-200 max-w-md mx-auto">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Error Loading Ideas
           </h2>
-          <p className="text-neutral-500 text-sm mb-3 line-clamp-2">
-            {idea.description}
+          <div className="text-neutral-700 mb-6">{error}</div>
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </button>
+        </div>
+      );
+    }
+
+    if (ideas.length === 0 && !loading) {
+      return (
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-neutral-200 max-w-md mx-auto text-center">
+          <h2 className="text-2xl font-bold text-orange-600 mb-4">
+            No Ideas Yet
+          </h2>
+          <p className="text-neutral-700 mb-6">
+            Get started by creating your first idea!
           </p>
-          <div className="flex flex-wrap gap-2 mt-auto">
-            {idea.clips.slice(0, 2).map((clip: any) => (
-              <span
-                key={clip.id}
-                className="inline-flex items-center px-2 py-1 text-xs rounded bg-neutral-50 text-neutral-700 gap-1 border border-neutral-200"
-              >
-                {clip.type === "text" && (
-                  <svg
-                    className="w-3 h-3 text-orange-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                    <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
-                    <path d="M9 9h1" />
-                    <path d="M9 13h6" />
-                    <path d="M9 17h6" />
-                  </svg>
-                )}
-                {clip.type === "link" && (
-                  <svg
-                    className="w-3 h-3 text-blue-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                  </svg>
-                )}
-                {clip.type === "image" && (
-                  <svg
-                    className="w-3 h-3 text-blue-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="m21 15-5-5L5 21" />
-                  </svg>
-                )}
-                <span>
-                  {clip.content.length > 20
-                    ? clip.content.slice(0, 20) + "..."
-                    : clip.content}
-                </span>
-              </span>
-            ))}
-            {idea.clips.length > 2 && (
-              <span className="inline-flex items-center px-2 py-1 text-xs rounded bg-orange-50 text-orange-500 border border-orange-100">
-                +{idea.clips.length - 2} more
-              </span>
-            )}
+          <button
+            className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 w-full"
+            onClick={openNewIdea}
+          >
+            Create Your First Idea
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Add New Idea Card */}
+        <Button
+          onClick={openNewIdea}
+          variant="primary"
+          size="lg"
+          className="flex flex-col items-center justify-center border-2 border-dashed border-orange-200 rounded-2xl p-8 h-56 bg-white text-orange-600 hover:bg-orange-50 transition-all cursor-pointer shadow-md group relative overflow-hidden"
+        >
+          <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-orange-400 to-orange-200 opacity-70 group-hover:opacity-100 transition-all rounded-l-2xl" />
+          <div className="bg-white rounded-full p-3 mb-3 shadow-sm z-10">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-orange-500"
+            >
+              <path d="M5 12h14" />
+              <path d="M12 5v14" />
+            </svg>
           </div>
-        </motion.div>
-      ))}
-    </div>
-  );
+          <span className="font-semibold text-lg z-10">Start a New Idea</span>
+          <span className="text-xs mt-2 text-orange-400 z-10">
+            Collect, organize, and create!
+          </span>
+        </Button>
+        {/* Idea Cards */}
+        {ideas.map((idea) => (
+          <motion.div
+            key={idea.id}
+            whileHover={{ y: -6, boxShadow: "0 8px 32px 0 rgba(0,0,0,0.10)" }}
+            className="relative flex flex-col rounded-2xl bg-white p-6 shadow-md hover:shadow-xl transition-all cursor-pointer border border-neutral-200 hover:border-orange-300 group overflow-hidden"
+            onClick={() => openEditIdea(idea)}
+          >
+            {/* Vertical accent bar */}
+            <div className="absolute left-0 top-0 h-full w-2 bg-gradient-to-b from-orange-400 to-orange-200 opacity-70 group-hover:opacity-100 transition-all rounded-l-2xl" />
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              {idea.tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-1 text-xs rounded bg-neutral-100 text-neutral-700 font-medium border border-neutral-200"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+            <h2 className="font-bold text-xl mb-1 text-neutral-900 truncate">
+              {idea.title}
+            </h2>
+            <p className="text-neutral-500 text-sm mb-3 line-clamp-2">
+              {idea.description}
+            </p>
+            <div className="mt-auto text-xs text-neutral-500">
+              ID: {idea.id}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="flex min-h-screen bg-neutral-50 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-orange-50 via-yellow-50 to-white">

@@ -1,12 +1,17 @@
 import React from "react";
 import Image from "next/image";
 import { Clip } from "@/types/idea";
+import {
+  isYouTubeUrl,
+  extractYouTubeVideoId,
+  createYouTubeEmbedUrl,
+} from "@/lib/videoUtils";
 
 interface ClipCardProps {
   clip: Clip;
-  onEdit: (clipId: number) => void;
-  onDelete: (clipId: number) => void;
-  onContentChange?: (clipId: number, content: string) => void;
+  onEdit: (clipId: string) => void;
+  onDelete: (clipId: string) => void;
+  onContentChange?: (clipId: string, content: string) => void;
   isEditing: boolean;
 }
 
@@ -78,14 +83,14 @@ export const ClipCard: React.FC<ClipCardProps> = ({
             <button
               className="px-3 py-1 rounded bg-orange-500 text-white font-bold hover:bg-orange-600"
               title="Save"
-              onClick={() => onEdit(0)} // Pass 0 to deselect
+              onClick={() => onEdit("")} // Pass empty string to deselect
             >
               Save
             </button>
             <button
               className="px-3 py-1 rounded bg-neutral-200 text-neutral-700 hover:bg-neutral-300"
               title="Cancel"
-              onClick={() => onEdit(0)} // Pass 0 to deselect
+              onClick={() => onEdit("")} // Pass empty string to deselect
             >
               Cancel
             </button>
@@ -111,13 +116,27 @@ export const ClipCard: React.FC<ClipCardProps> = ({
     }
 
     if (clip.type === "video") {
+      const isYoutube = isYouTubeUrl(clip.content);
+      const videoId = isYoutube ? extractYouTubeVideoId(clip.content) : null;
+      const embedUrl = videoId ? createYouTubeEmbedUrl(videoId) : "";
+
       return (
-        <div className="relative aspect-w-16 aspect-h-9">
-          <video
-            src={clip.content}
-            controls
-            className="w-full h-full rounded shadow bg-black object-contain"
-          />
+        <div className="relative aspect-video">
+          {isYoutube && videoId ? (
+            <iframe
+              src={embedUrl}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full rounded shadow"
+              title="YouTube video player"
+            />
+          ) : (
+            <video
+              src={clip.content}
+              controls
+              className="w-full h-full rounded shadow bg-black object-contain"
+            />
+          )}
           <div className="absolute inset-0 hidden group-hover/video:flex items-center justify-center bg-black/30 rounded">
             <span className="text-white text-xs bg-black/60 px-2 py-1 rounded">
               Preview

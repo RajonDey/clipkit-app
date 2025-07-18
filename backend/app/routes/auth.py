@@ -46,8 +46,10 @@ async def register(user_data: UserCreate, db: Session = Depends(get_db)):
 @router.post("/auth/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     # Find user by email
+    print(f"Login attempt for email: {form_data.username}")
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user:
+        print(f"User not found: {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -56,6 +58,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
     
     # Verify password
     if not verify_password(form_data.password, user.hashed_password):
+        print(f"Invalid password for user: {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -68,4 +71,5 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     
+    print(f"Login successful for: {user.email}")
     return {"access_token": access_token, "token_type": "bearer"}

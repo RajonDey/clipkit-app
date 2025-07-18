@@ -12,7 +12,7 @@ const api = axios.create({
 // Add token to requests if it exists
 api.interceptors.request.use((config) => {
   // Only run this in browser environment (not during SSR)
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     let token = localStorage.getItem("token");
     console.log(
       "Token from localStorage:",
@@ -81,7 +81,7 @@ interface RegisterData {
 
 interface ContentGenerationRequest {
   idea_id: string;
-  clip_ids: (number | string)[]; // Accept both numbers and strings
+  clip_ids: number[];
   content_type: string;
   tone: string;
   length: string;
@@ -182,7 +182,7 @@ export const ideas = {
       throw error;
     }
   },
-
+  
   getById: async (id: string) => {
     try {
       console.log(`Fetching idea with ID: ${id}`);
@@ -194,7 +194,7 @@ export const ideas = {
       throw error;
     }
   },
-
+  
   create: async (data: IdeaCreateData) => {
     try {
       console.log("Creating new idea:", data);
@@ -206,7 +206,7 @@ export const ideas = {
       throw error;
     }
   },
-
+  
   update: async (id: string, data: IdeaUpdateData) => {
     try {
       console.log(`Updating idea ${id}:`, data);
@@ -218,7 +218,7 @@ export const ideas = {
       throw error;
     }
   },
-
+  
   delete: async (id: string) => {
     try {
       console.log(`Deleting idea ${id}`);
@@ -229,7 +229,7 @@ export const ideas = {
       console.error(`Error deleting idea ${id}:`, error);
       throw error;
     }
-  },
+  }
 };
 
 // API methods for clips
@@ -245,7 +245,7 @@ export const clips = {
       throw error;
     }
   },
-
+  
   getByIdea: async (ideaId: string) => {
     try {
       console.log(`Fetching clips for idea ${ideaId}`);
@@ -257,7 +257,7 @@ export const clips = {
       throw error;
     }
   },
-
+  
   getById: async (id: string) => {
     try {
       console.log(`Fetching clip ${id}`);
@@ -269,14 +269,14 @@ export const clips = {
       throw error;
     }
   },
-
+  
   create: async (ideaId: string, data: ClipCreateData) => {
     try {
       console.log(`Creating clip for idea ${ideaId}:`, data);
       // Add idea ID to clip data
       const clipData = {
         ...data,
-        idea_id: ideaId,
+        idea_id: ideaId
       };
       const response = await api.post("/clips", clipData);
       console.log("Clip creation response:", response.data);
@@ -286,7 +286,7 @@ export const clips = {
       throw error;
     }
   },
-
+  
   update: async (id: string, data: ClipUpdateData) => {
     try {
       console.log(`Updating clip ${id}:`, data);
@@ -298,7 +298,7 @@ export const clips = {
       throw error;
     }
   },
-
+  
   delete: async (id: string) => {
     try {
       console.log(`Deleting clip ${id}`);
@@ -309,7 +309,7 @@ export const clips = {
       console.error(`Error deleting clip ${id}:`, error);
       throw error;
     }
-  },
+  }
 };
 
 // Export the axios instance for direct use

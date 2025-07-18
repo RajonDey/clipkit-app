@@ -1,7 +1,7 @@
 export type ClipType = "text" | "image" | "video" | "code" | "link";
 
 export interface Clip {
-  id: number;
+  id: string; // Changed from number to string to match backend UUID format
   type: ClipType;
   content: string;
   created: string;

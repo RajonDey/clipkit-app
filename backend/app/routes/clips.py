@@ -23,7 +23,13 @@ def list_clips(
     query = db.query(Clip).join(Idea).filter(Idea.user_id == current_user.id)
     if idea:
         query = query.filter(Idea.id == idea)
-    return query.all()
+    
+    clips = query.all()
+    print(f"Returning {len(clips)} clips for user {current_user.email}, idea filter: {idea}")
+    for i, clip in enumerate(clips):
+        print(f"  Clip {i+1}: id={clip.id}, type={clip.type}")
+    
+    return clips
 
 @router.get("/clips/{clip_id}")
 def get_clip(

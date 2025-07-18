@@ -1,6 +1,11 @@
 import React from "react";
 import Image from "next/image";
 import { Clip } from "@/types/idea";
+import {
+  isYouTubeUrl,
+  extractYouTubeVideoId,
+  createYouTubeEmbedUrl,
+} from "@/lib/videoUtils";
 
 interface ClipModalProps {
   clip: Clip;
@@ -51,7 +56,7 @@ export const ClipModal: React.FC<ClipModalProps> = ({ clip, onClose }) => {
 
         <div className="mb-2">
           {clip.type === "image" ? (
-            <div className="h-48 w-full relative mb-2">
+            <div className="relative aspect-[4/3] mb-2">
               <Image
                 src={clip.content}
                 alt="clip"
@@ -62,11 +67,29 @@ export const ClipModal: React.FC<ClipModalProps> = ({ clip, onClose }) => {
               />
             </div>
           ) : clip.type === "video" ? (
-            <video
-              src={clip.content}
-              controls
-              className="h-48 w-full rounded shadow bg-black mb-2"
-            />
+            (() => {
+              const isYoutube = isYouTubeUrl(clip.content);
+              const videoId = isYoutube
+                ? extractYouTubeVideoId(clip.content)
+                : null;
+              const embedUrl = videoId ? createYouTubeEmbedUrl(videoId) : "";
+
+              return isYoutube && videoId ? (
+                <iframe
+                  src={embedUrl}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full aspect-video rounded shadow mb-2"
+                  title="YouTube video player"
+                />
+              ) : (
+                <video
+                  src={clip.content}
+                  controls
+                  className="w-full aspect-video rounded shadow bg-black mb-2"
+                />
+              );
+            })()
           ) : clip.type === "code" ? (
             <pre className="overflow-x-auto text-sm p-4 rounded bg-neutral-900 text-orange-200 font-mono mb-2">
               <code>{clip.content}</code>

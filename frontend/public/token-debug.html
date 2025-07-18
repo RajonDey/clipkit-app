@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Token Debugging</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      pre {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+      button {
+        padding: 10px 15px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-right: 10px;
+        margin-bottom: 10px;
+      }
+      button:hover {
+        background-color: #45a049;
+      }
+      input {
+        padding: 8px;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      .error {
+        color: red;
+        font-weight: bold;
+      }
+      .success {
+        color: green;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Token Debugging Tool</h1>
+
+      <div>
+        <h2>Current Token in localStorage</h2>
+        <pre id="current-token">Loading...</pre>
+        <div id="token-status"></div>
+        <button onclick="clearToken()">Clear Token</button>
+        <button onclick="checkToken()">Check Token</button>
+      </div>
+
+      <div>
+        <h2>Login Test</h2>
+        <div>
+          <label for="email">Email:</label>
+          <input type="email" id="email" placeholder="Enter your email" />
+        </div>
+        <div>
+          <label for="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Enter your password"
+          />
+        </div>
+        <button onclick="login()">Login</button>
+        <div id="login-result"></div>
+      </div>
+
+      <div>
+        <h2>Set Manual Token</h2>
+        <div>
+          <label for="manual-token">JWT Token:</label>
+          <input
+            type="text"
+            id="manual-token"
+            placeholder="Enter a JWT token"
+          />
+        </div>
+        <button onclick="setManualToken()">Set Token</button>
+      </div>
+
+      <div>
+        <h2>Generate Content Test</h2>
+        <button onclick="testContentGeneration()">
+          Test Content Generation
+        </button>
+        <div id="content-result"></div>
+        <pre id="content-output"></pre>
+      </div>
+    </div>
+
+    <script>
+      // Initialize page
+      document.addEventListener("DOMContentLoaded", function () {
+        displayCurrentToken();
+      });
+
+      function displayCurrentToken() {
+        const token = localStorage.getItem("token");
+        const tokenDisplay = document.getElementById("current-token");
+        const tokenStatus = document.getElementById("token-status");
+
+        if (!token) {
+          tokenDisplay.textContent = "No token found in localStorage";
+          tokenStatus.innerHTML = '<span class="error">No token found</span>';
+          return;
+        }
+
+        tokenDisplay.textContent = token;
+
+        // Check token format
+        try {
+          const parts = token.split(".");
+          if (parts.length !== 3) {
+            tokenStatus.innerHTML = `<span class="error">Invalid token format: Expected 3 parts, found ${parts.length}</span>`;
+            return;
+          }
+
+          // Decode payload
+          const payload = JSON.parse(atob(parts[1]));
+          const now = Math.floor(Date.now() / 1000);
+          const expiry = payload.exp;
+          const isExpired = expiry < now;
+
+          let statusHtml = "<div>";
+          statusHtml += `<p>Subject: ${payload.sub}</p>`;
+          statusHtml += `<p>Expires: ${new Date(
+            expiry * 1000
+          ).toLocaleString()}</p>`;
+
+          if (isExpired) {
+            statusHtml += `<p class="error">Token is EXPIRED</p>`;
+          } else {
+            const timeLeft = expiry - now;
+            const hoursLeft = Math.floor(timeLeft / 3600);
+            const minutesLeft = Math.floor((timeLeft % 3600) / 60);
+            statusHtml += `<p class="success">Token is valid (${hoursLeft}h ${minutesLeft}m remaining)</p>`;
+          }
+
+          statusHtml += "</div>";
+          tokenStatus.innerHTML = statusHtml;
+        } catch (e) {
+          tokenStatus.innerHTML = `<span class="error">Error parsing token: ${e.message}</span>`;
+        }
+      }
+
+      function clearToken() {
+        localStorage.removeItem("token");
+        displayCurrentToken();
+        alert("Token cleared from localStorage");
+      }
+
+      function checkToken() {
+        displayCurrentToken();
+      }
+
+      async function login() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const loginResult = document.getElementById("login-result");
+
+        if (!email || !password) {
+          loginResult.innerHTML =
+            '<span class="error">Please enter both email and password</span>';
+          return;
+        }
+
+        loginResult.innerHTML = "Logging in...";
+
+        try {
+          const formData = new URLSearchParams();
+          formData.append("username", email);
+          formData.append("password", password);
+
+          const response = await fetch("http://localhost:8000/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Login failed: ${response.status} ${errorText}`);
+          }
+
+          const data = await response.json();
+
+          if (data.access_token) {
+            // Store token in localStorage
+            localStorage.setItem("token", data.access_token);
+            loginResult.innerHTML =
+              '<span class="success">Login successful!</span>';
+
+            // Display the updated token
+            displayCurrentToken();
+          } else {
+            throw new Error("Invalid response format, missing access_token");
+          }
+        } catch (error) {
+          loginResult.innerHTML = `<span class="error">${error.message}</span>`;
+          console.error("Login error:", error);
+        }
+      }
+
+      function setManualToken() {
+        const token = document.getElementById("manual-token").value;
+        if (!token) {
+          alert("Please enter a token");
+          return;
+        }
+
+        localStorage.setItem("token", token);
+        displayCurrentToken();
+        alert("Token set in localStorage");
+      }
+
+      async function testContentGeneration() {
+        const contentResult = document.getElementById("content-result");
+        const contentOutput = document.getElementById("content-output");
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+          contentResult.innerHTML =
+            '<span class="error">No token found. Please log in first.</span>';
+          return;
+        }
+
+        contentResult.innerHTML = "Testing content generation...";
+        contentOutput.textContent = "";
+
+        try {
+          // Get the first idea to test with
+          const ideasResponse = await fetch("http://localhost:8000/ideas", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!ideasResponse.ok) {
+            throw new Error(`Failed to get ideas: ${ideasResponse.status}`);
+          }
+
+          const ideas = await ideasResponse.json();
+
+          if (!ideas || ideas.length === 0) {
+            contentResult.innerHTML =
+              '<span class="error">No ideas found. Please create an idea first.</span>';
+            return;
+          }
+
+          const idea = ideas[0];
+
+          // Get clips for this idea
+          const clipsResponse = await fetch(
+            `http://localhost:8000/clips?idea=${idea.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (!clipsResponse.ok) {
+            throw new Error(`Failed to get clips: ${clipsResponse.status}`);
+          }
+
+          const clips = await clipsResponse.json();
+
+          if (!clips || clips.length === 0) {
+            contentResult.innerHTML =
+              '<span class="error">No clips found for the idea. Please add clips first.</span>';
+            return;
+          }
+
+          // Get clip IDs
+          const clipIds = clips.map((clip) => clip.id);
+
+          // Generate content
+          const contentResponse = await fetch(
+            "http://localhost:8000/content/generate",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                idea_id: idea.id,
+                clip_ids: clipIds,
+                content_type: "article",
+                tone: "professional",
+                length: "short",
+              }),
+            }
+          );
+
+          if (!contentResponse.ok) {
+            const errorText = await contentResponse.text();
+            throw new Error(
+              `Failed to generate content: ${contentResponse.status} ${errorText}`
+            );
+          }
+
+          const contentData = await contentResponse.json();
+
+          contentResult.innerHTML =
+            '<span class="success">Content generated successfully!</span>';
+          contentOutput.textContent = contentData.content;
+        } catch (error) {
+          contentResult.innerHTML = `<span class="error">${error.message}</span>`;
+          console.error("Content generation error:", error);
+        }
+      }
+    </script>
+  </body>
+</html>

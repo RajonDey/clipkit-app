@@ -44,25 +44,84 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true);
 
     try {
+      let result;
+      console.log("Starting authentication process...");
+
       if (isRegister && data.name) {
-        const result = await auth.register({
-          email: data.email,
-          password: data.password,
-          name: data.name,
-        });
-        localStorage.setItem("token", result.access_token);
+        console.log("Attempting to register user:", data.email);
+        try {
+          result = await auth.register({
+            email: data.email,
+            password: data.password,
+            name: data.name,
+          });
+          console.log("Register response:", result);
+        } catch (error) {
+          console.error("Register API error:", error);
+          throw new Error(
+            `Registration failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
       } else {
-        const result = await auth.login({
-          username: data.email,
-          password: data.password,
-        });
-        localStorage.setItem("token", result.access_token);
+        console.log("Attempting to login user:", data.email);
+        try {
+          result = await auth.login({
+            username: data.email,
+            password: data.password,
+          });
+          console.log("Login response:", result);
+        } catch (error) {
+          console.error("Login API error:", error);
+          throw new Error(
+            `Login failed: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
       }
 
-      // Redirect to dashboard
-      router.push("/dashboard");
+      // Check if we have a valid token
+      if (result && result.access_token) {
+        console.log("Setting token:", result.access_token);
+
+        // Ensure we don't store with quotes
+        let tokenToStore = result.access_token;
+        if (
+          typeof tokenToStore === "string" &&
+          tokenToStore.startsWith('"') &&
+          tokenToStore.endsWith('"')
+        ) {
+          tokenToStore = tokenToStore.slice(1, -1);
+          console.log("Removed quotes from token before storing");
+        }
+
+        localStorage.setItem("token", tokenToStore);
+
+        // Verify the token was set correctly
+        const storedToken = localStorage.getItem("token");
+        console.log("Verified stored token:", storedToken);
+
+        // Redirect to dashboard
+        router.push("/dashboard");
+      } else {
+        console.error("Invalid response format, missing access_token:", result);
+        alert("Login failed: Invalid server response");
+      }
     } catch (error) {
       console.error("Authentication error:", error);
+
+      // Check for network errors (Failed to fetch)
+      if (error instanceof Error && error.message.includes("Failed to fetch")) {
+        alert(
+          "Network error: Unable to connect to the authentication server. Please check if the backend server is running."
+        );
+      } else if (error instanceof Error) {
+        alert(`Login failed: ${error.message}`);
+      } else {
+        alert("Login failed. Please check your credentials and try again.");
+      }
     } finally {
       setIsLoading(false);
     }

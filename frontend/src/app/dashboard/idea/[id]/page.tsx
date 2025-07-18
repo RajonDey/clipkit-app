@@ -1,62 +1,18 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import { Idea, Clip, ClipType, ContentTypeOption } from "@/types/idea";
 import { ClipModal } from "@/components/clips/ClipModal";
 import { ClipSection } from "@/components/clips/ClipSection";
 import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
 import { AddClipModal } from "@/components/clips/AddClipModal";
+import { ContentWorkspace } from "@/components/ai/ContentWorkspace";
+import axios from "axios";
+import * as api from "@/lib/api";
 
-// Dummy data for mockup (replace with API fetch)
-const mockIdeas: Idea[] = [
-  {
-    id: "1",
-    title: "My First Article Idea",
-    description: "A creative article about productivity hacks for creators.",
-    tags: ["productivity", "creativity"],
-    clips: [
-      {
-        id: 1,
-        type: "text",
-        content: "Clip: Top 5 productivity tools.",
-        created: "2025-07-10",
-        tags: ["tip"],
-      },
-      {
-        id: 2,
-        type: "link",
-        content: "https://zenhabits.net/",
-        created: "2025-07-10",
-        tags: ["resource"],
-      },
-      {
-        id: 3,
-        type: "image",
-        content: "https://picsum.photos/200/100", // Updated valid dummy image URL
-        created: "2025-07-10",
-        tags: [],
-      },
-      {
-        id: 4,
-        type: "code",
-        content: "console.log('Hello!')",
-        lang: "js",
-        created: "2025-07-10",
-        tags: ["snippet"],
-      },
-      {
-        id: 5,
-        type: "video",
-        content: "https://www.w3schools.com/html/mov_bbb.mp4", // Added valid dummy video URL
-        created: "2025-07-10",
-        tags: ["demo"],
-      },
-    ],
-  },
-];
-
+// Content type options for filtering
 const contentTypes: ContentTypeOption[] = [
   { value: "all", label: "All" },
   { value: "text", label: "Text" },
@@ -71,8 +27,11 @@ const contentTypes: ContentTypeOption[] = [
  */
 export default function Page() {
   const params = useParams();
-  const ideaId = (params?.id as string) || "1";
+  const router = useRouter();
+  const ideaId = params?.id as string;
   const [idea, setIdea] = useState<Idea | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | ClipType>("all");
   const [clips, setClips] = useState<Clip[]>([]);
 
@@ -85,17 +44,143 @@ export default function Page() {
   const [newTag, setNewTag] = useState("");
 
   // Modal for previewing/editing a clip
-  const [selectedClipId, setSelectedClipId] = useState<number | null>(null);
+  const [selectedClipId, setSelectedClipId] = useState<string | null>(null);
 
   // Modal for adding a new clip
   const [showAddClipModal, setShowAddClipModal] = useState(false);
 
+  // Check if ID looks valid (UUID format)
+  const isValidUUID = (id: string) => {
+    const uuidRegex =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(id);
+  };
+
+  // Fetch idea and clips data from API
   useEffect(() => {
-    // Replace with API fetch
-    const found = mockIdeas.find((i) => i.id === ideaId);
-    setIdea(found || null);
-    setClips(found ? found.clips : []);
-  }, [ideaId]);
+    if (!ideaId) {
+      router.push("/dashboard");
+      return;
+    }
+
+    // Check if the ID looks like a valid UUID
+    if (!isValidUUID(ideaId)) {
+      console.error(`Invalid idea ID format: ${ideaId}. Expected UUID format.`);
+      setError(
+        `The ID "${ideaId}" doesn't look like a valid idea ID. Please check the URL.`
+      );
+      setLoading(false);
+      return;
+    }
+
+    const fetchIdeaData = async () => {
+      try {
+        setLoading(true);
+        // Check for token first
+        if (typeof window !== "undefined" && !localStorage.getItem("token")) {
+          console.log("No authentication token found, redirecting to login");
+          router.push("/auth");
+          return;
+        }
+
+        console.log(`Attempting to fetch idea with ID: ${ideaId}`);
+
+        // Fetch idea details
+        const ideaData = await api.ideas.getById(ideaId);
+        console.log("Idea data received:", ideaData);
+
+        // Transform API data to match our frontend model
+        const transformedIdea: Idea = {
+          id: ideaData.id,
+          title: ideaData.name,
+          description: ideaData.category || "No description available",
+          tags: ideaData.tags || [],
+          clips: [],
+        };
+
+        setIdea(transformedIdea);
+        setEditedTitle(transformedIdea.title);
+
+        // Fetch clips for this idea
+        console.log(`Fetching clips for idea: ${ideaId}`);
+        const clipsData = await api.clips.getByIdea(ideaId);
+        console.log("Clips data received:", clipsData);
+
+        // Transform API clips to match our frontend model
+        interface ApiClip {
+          id: string;
+          type: string;
+          value: string;
+          created_at: string;
+          tags?: Array<{ name: string }>;
+        }
+
+        const transformedClips: Clip[] = Array.isArray(clipsData)
+          ? clipsData.map((clip: ApiClip) => ({
+              id: clip.id, // Keep as string ID instead of converting to number
+              type: clip.type as ClipType,
+              content: clip.value,
+              created: clip.created_at || new Date().toISOString().slice(0, 10),
+              tags: clip.tags?.map((tag) => tag.name) || [],
+            }))
+          : [];
+
+        setClips(transformedClips);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching idea data:", err);
+
+        // Enhanced error logging
+        if (axios.isAxiosError(err)) {
+          // The request was made and the server responded with a status code
+          // that falls out of the range of 2xx
+          if (err.response) {
+            console.error("Error response data:", err.response.data);
+            console.error("Error response status:", err.response.status);
+
+            if (err.response.status === 401 || err.response.status === 403) {
+              console.log("Authentication error, redirecting to login");
+              if (typeof window !== "undefined") {
+                localStorage.removeItem("token"); // Clear invalid token
+              }
+              router.push("/auth");
+              return;
+            } else if (err.response.status === 404) {
+              setError(
+                `Idea with ID ${ideaId} not found. Please check the URL and try again.`
+              );
+            } else {
+              const detail =
+                err.response.data?.detail || "Unknown server error";
+              setError(`Server error: ${detail}`);
+            }
+          } else if (err.request) {
+            // The request was made but no response was received
+            console.error("No response received:", err.request);
+            setError(
+              "Failed to connect to the server. Please check your internet connection."
+            );
+          } else {
+            // Something happened in setting up the request that triggered an Error
+            console.error("Error details:", err.message);
+            setError(`Failed to load idea: ${err.message || "Unknown error"}`);
+          }
+        } else {
+          // Non-axios error
+          console.error("Non-axios error:", err);
+          setError(
+            `Failed to load idea: ${
+              err instanceof Error ? err.message : "Unknown error"
+            }`
+          );
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIdeaData();
+  }, [ideaId, router]);
 
   /**
    * Filters clips based on the active tab
@@ -106,34 +191,193 @@ export default function Page() {
   /**
    * Handles adding a new clip to the collection
    */
-  const handleAddClip = (type: ClipType, content: string, tag: string) => {
+  const handleAddClip = async (
+    type: ClipType,
+    content: string,
+    tag: string
+  ) => {
     if (!content.trim()) return;
-    const newClipObj: Clip = {
-      id: Date.now(),
-      type,
-      content,
-      created: new Date().toISOString().slice(0, 10),
-      tags: tag ? [tag] : [],
-    };
-    setClips([newClipObj, ...clips]);
+
+    try {
+      // Call API to create clip
+      const apiResponse = await api.clips.create(ideaId, {
+        type,
+        value: content,
+        tags: tag ? [tag] : [],
+      });
+
+      // Transform API response to frontend model
+      const newClip: Clip = {
+        id: apiResponse.id, // Keep as string instead of parsing to int
+        type,
+        content,
+        created: new Date().toISOString().slice(0, 10),
+        tags: tag ? [tag] : [],
+      };
+
+      setClips([newClip, ...clips]);
+    } catch (error) {
+      console.error("Error adding clip:", error);
+      // TODO: Add error handling UI
+    }
   };
 
   /**
    * Updates the content of a clip
    */
-  const handleClipContentChange = (clipId: number, content: string) => {
-    setClips(clips.map((c) => (c.id === clipId ? { ...c, content } : c)));
+  const handleClipContentChange = async (clipId: string, content: string) => {
+    try {
+      // Call API to update clip
+      await api.clips.update(clipId, {
+        value: content,
+      });
+
+      // Update local state
+      setClips(clips.map((c) => (c.id === clipId ? { ...c, content } : c)));
+    } catch (error) {
+      console.error("Error updating clip:", error);
+      // TODO: Add error handling UI
+    }
   };
 
   /**
    * Deletes a clip
    */
-  const handleDeleteClip = (clipId: number) => {
-    setClips(clips.filter((c) => c.id !== clipId));
+  const handleDeleteClip = async (clipId: string) => {
+    try {
+      // Call API to delete clip
+      await api.clips.delete(clipId);
+
+      // Update local state
+      setClips(clips.filter((c) => c.id !== clipId));
+    } catch (error) {
+      console.error("Error deleting clip:", error);
+      // TODO: Add error handling UI
+    }
+  }; // Handle updating the idea title
+  const handleUpdateTitle = async () => {
+    if (!idea || editedTitle === idea.title) {
+      setIsEditingTitle(false);
+      return;
+    }
+
+    try {
+      // Call API to update idea
+      await api.ideas.update(ideaId, {
+        name: editedTitle,
+      });
+
+      // Update local state
+      setIdea({ ...idea, title: editedTitle });
+      setIsEditingTitle(false);
+    } catch (error) {
+      console.error("Error updating idea title:", error);
+      // Reset to original title
+      setEditedTitle(idea.title);
+      setIsEditingTitle(false);
+    }
   };
 
-  if (!idea)
-    return <div className="text-center text-gray-400 mt-20">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="flex min-h-screen bg-neutral-50">
+        <Sidebar active="Ideas" />
+        <main className="flex-1 flex flex-row min-h-screen ml-16 sm:ml-64 transition-all duration-300">
+          <section className="w-full flex justify-center items-center">
+            <div className="animate-pulse">
+              <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-96 mb-8"></div>
+              <div className="h-40 bg-gray-200 rounded w-full max-w-2xl mb-4"></div>
+              <div className="h-40 bg-gray-200 rounded w-full max-w-2xl mb-4"></div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (error || !idea) {
+    return (
+      <div className="flex min-h-screen bg-neutral-50">
+        <Sidebar active="Ideas" />
+        <main className="flex-1 flex flex-row min-h-screen ml-16 sm:ml-64 transition-all duration-300">
+          <section className="w-full flex flex-col justify-center items-center p-8">
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-neutral-200 max-w-md w-full">
+              <h2 className="text-2xl font-bold text-red-600 mb-4">
+                Error Loading Idea
+              </h2>
+              <div className="text-neutral-700 mb-6">
+                {error || "Idea not found. Please try again."}
+              </div>
+              {error && error.includes("not found") && (
+                <div className="bg-blue-50 p-4 rounded-lg mb-6 text-sm text-blue-800">
+                  <p className="font-medium mb-2">🔍 Possible Causes:</p>
+                  <ul className="list-disc ml-5 space-y-1">
+                    <li>The idea ID in the URL might be incorrect</li>
+                    <li>The idea might have been deleted</li>
+                    <li>You might not have permission to view this idea</li>
+                  </ul>
+                </div>
+              )}
+              {error && error.includes("connect") && (
+                <div className="bg-blue-50 p-4 rounded-lg mb-6 text-sm text-blue-800">
+                  <p className="font-medium mb-2">🌐 Connection Issues:</p>
+                  <ul className="list-disc ml-5 space-y-1">
+                    <li>Check if the backend server is running</li>
+                    <li>Ensure your internet connection is active</li>
+                    <li>The API server might be temporarily down</li>
+                  </ul>
+                </div>
+              )}
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-4">
+                  <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex-1"
+                    onClick={() => router.push("/dashboard")}
+                  >
+                    Back to Dashboard
+                  </button>
+                  <button
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 flex-1"
+                    onClick={() => window.location.reload()}
+                  >
+                    Try Again
+                  </button>
+                </div>
+
+                <button
+                  className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 w-full"
+                  onClick={async () => {
+                    try {
+                      setLoading(true);
+                      // Create a demo idea
+                      const newIdea = await api.ideas.create({
+                        name: "My Demo Idea",
+                        category: "Demo Category",
+                        tags: ["demo", "example"],
+                      });
+                      console.log("Created demo idea:", newIdea);
+
+                      // Navigate to the new idea
+                      router.push(`/dashboard/idea/${newIdea.id}`);
+                    } catch (error) {
+                      console.error("Error creating demo idea:", error);
+                      setError(
+                        "Failed to create demo idea. Please try again or check your connection."
+                      );
+                      setLoading(false);
+                    }
+                  }}
+                >
+                  Create Demo Idea
+                </button>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-neutral-50">
@@ -157,18 +401,13 @@ export default function Page() {
                         value={editedTitle}
                         autoFocus
                         onChange={(e) => setEditedTitle(e.target.value)}
-                        onBlur={() => {
-                          setIsEditingTitle(false);
-                          if (editedTitle.trim()) {
-                            setIdea({ ...idea!, title: editedTitle });
-                          }
-                        }}
+                        onBlur={handleUpdateTitle}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
+                            handleUpdateTitle();
+                          } else if (e.key === "Escape") {
                             setIsEditingTitle(false);
-                            if (editedTitle.trim()) {
-                              setIdea({ ...idea!, title: editedTitle });
-                            }
+                            setEditedTitle(idea.title);
                           }
                         }}
                       />
@@ -257,6 +496,20 @@ export default function Page() {
                       <button
                         className="w-full text-left px-4 py-2 bg-white hover:bg-red-50 text-red-600 flex items-center gap-2 transition whitespace-nowrap"
                         title="Delete Idea"
+                        onClick={async () => {
+                          if (
+                            window.confirm(
+                              "Are you sure you want to delete this idea?"
+                            )
+                          ) {
+                            try {
+                              await api.ideas.delete(ideaId);
+                              router.push("/dashboard");
+                            } catch (error) {
+                              console.error("Error deleting idea:", error);
+                            }
+                          }
+                        }}
                       >
                         <span className="text-lg">🗑️</span> Delete Idea
                       </button>
@@ -337,16 +590,7 @@ export default function Page() {
 
         {/* Right Pane: AI/content editor area */}
         <aside className="hidden md:flex flex-col w-1/2 xl:w-1/3 border-l border-neutral-200 bg-white/80 backdrop-blur-lg p-8 min-h-screen">
-          <div className="flex-1 flex flex-col items-center justify-center w-full h-full">
-            <span className="text-2xl mb-2">🤖</span>
-            <div className="text-lg font-medium mb-2">
-              AI Content Workspace (Coming Soon)
-            </div>
-            <div className="text-sm text-neutral-400 text-center">
-              Use your collected resources to generate articles, scripts, or
-              other content with AI assistance here.
-            </div>
-          </div>
+          <ContentWorkspace idea={idea} clips={clips} />
         </aside>
       </main>
 

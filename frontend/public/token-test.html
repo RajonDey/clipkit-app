@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Auth Token Test</title>
+    <script>
+      async function testToken() {
+        // Clear results
+        document.getElementById("result").innerHTML = "";
+
+        // Get token from localStorage
+        const token = localStorage.getItem("token");
+        document.getElementById("token").textContent =
+          token || "No token found";
+
+        if (!token) {
+          document.getElementById("result").innerHTML =
+            '<p style="color:red">No token in localStorage</p>';
+          return;
+        }
+
+        try {
+          // Make a test request
+          const response = await fetch(
+            "http://localhost:8000/content/generate",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                idea_id: "test-id",
+                clip_ids: [1],
+                content_type: "article",
+                tone: "professional",
+                length: "medium",
+              }),
+            }
+          );
+
+          const data = await response.json();
+          console.log("Response:", data);
+
+          if (response.ok) {
+            document.getElementById("result").innerHTML =
+              `<p style="color:green">Success! Status: ${response.status}</p>` +
+              `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+          } else {
+            document.getElementById("result").innerHTML =
+              `<p style="color:red">Error! Status: ${response.status}</p>` +
+              `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          document.getElementById(
+            "result"
+          ).innerHTML = `<p style="color:red">Error: ${error.message}</p>`;
+        }
+      }
+
+      function clearToken() {
+        localStorage.removeItem("token");
+        document.getElementById("token").textContent = "Token cleared";
+        document.getElementById("result").innerHTML = "";
+      }
+
+      function setToken() {
+        const newToken = document.getElementById("newToken").value;
+        if (newToken) {
+          localStorage.setItem("token", newToken);
+          document.getElementById("token").textContent = newToken;
+          document.getElementById("result").innerHTML =
+            "<p>Token set, test it now</p>";
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Auth Token Test</h1>
+
+    <div style="margin-bottom: 20px">
+      <h3>Current Token:</h3>
+      <pre
+        id="token"
+        style="background: #f0f0f0; padding: 10px; word-wrap: break-word"
+      ></pre>
+      <button onclick="testToken()">Test Token</button>
+      <button onclick="clearToken()">Clear Token</button>
+    </div>
+
+    <div style="margin-bottom: 20px">
+      <h3>Set Custom Token:</h3>
+      <input type="text" id="newToken" style="width: 300px" />
+      <button onclick="setToken()">Set Token</button>
+    </div>
+
+    <div id="result" style="margin-top: 20px"></div>
+
+    <script>
+      // Initialize token display on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("token");
+        document.getElementById("token").textContent =
+          token || "No token found";
+      });
+    </script>
+  </body>
+</html>

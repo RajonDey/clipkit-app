@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ClipKit Login Test</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        line-height: 1.6;
+      }
+      .container {
+        margin-top: 20px;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 5px;
+      }
+      button {
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        margin: 8px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .result {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #f5f5f5;
+        border-radius: 4px;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .success {
+        color: green;
+      }
+      .error {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ClipKit Login Test</h1>
+
+    <div class="container">
+      <h2>Login Form</h2>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" value="testuser@example.com" />
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" value="testpassword123" />
+      </div>
+      <button onclick="login()">Login</button>
+      <div id="loginResult" class="result"></div>
+    </div>
+
+    <div class="container">
+      <h2>Current Token</h2>
+      <div id="currentToken" class="result"></div>
+      <button onclick="clearToken()">Clear Token</button>
+    </div>
+
+    <div class="container">
+      <h2>Get Debug Token</h2>
+      <button onclick="getDebugToken()">Get Debug Token</button>
+      <div id="debugTokenResult" class="result"></div>
+    </div>
+
+    <div class="container">
+      <h2>Test API Call with Token</h2>
+      <button onclick="testApi()">Test API</button>
+      <div id="apiResult" class="result"></div>
+    </div>
+
+    <script>
+      // Display current token on load
+      document.addEventListener("DOMContentLoaded", () => {
+        const token = localStorage.getItem("token");
+        document.getElementById("currentToken").textContent =
+          token || "No token found";
+      });
+
+      // Login function
+      async function login() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const resultElement = document.getElementById("loginResult");
+
+        try {
+          resultElement.textContent = "Logging in...";
+          resultElement.className = "result";
+
+          const formData = new URLSearchParams();
+          formData.append("username", email);
+          formData.append("password", password);
+          formData.append("grant_type", "password");
+
+          const response = await fetch("http://localhost:8000/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: formData,
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            resultElement.textContent =
+              "Login successful!\n" + JSON.stringify(data, null, 2);
+            resultElement.className = "result success";
+
+            if (data.access_token) {
+              localStorage.setItem("token", data.access_token);
+              document.getElementById("currentToken").textContent =
+                data.access_token;
+            }
+          } else {
+            resultElement.textContent =
+              "Login failed!\n" + JSON.stringify(data, null, 2);
+            resultElement.className = "result error";
+          }
+        } catch (error) {
+          resultElement.textContent = `Error: ${error.message}`;
+          resultElement.className = "result error";
+          console.error("Login error:", error);
+        }
+      }
+
+      // Clear token
+      function clearToken() {
+        localStorage.removeItem("token");
+        document.getElementById("currentToken").textContent = "Token cleared";
+      }
+
+      // Get debug token
+      async function getDebugToken() {
+        const resultElement = document.getElementById("debugTokenResult");
+
+        try {
+          resultElement.textContent = "Getting debug token...";
+          resultElement.className = "result";
+
+          const response = await fetch(
+            "http://localhost:8000/auth/debug-token"
+          );
+          const data = await response.json();
+
+          if (response.ok) {
+            resultElement.textContent =
+              "Debug token received!\n" + JSON.stringify(data, null, 2);
+            resultElement.className = "result success";
+
+            if (data.access_token) {
+              localStorage.setItem("token", data.access_token);
+              document.getElementById("currentToken").textContent =
+                data.access_token;
+            }
+          } else {
+            resultElement.textContent =
+              "Failed to get debug token!\n" + JSON.stringify(data, null, 2);
+            resultElement.className = "result error";
+          }
+        } catch (error) {
+          resultElement.textContent = `Error: ${error.message}`;
+          resultElement.className = "result error";
+          console.error("Debug token error:", error);
+        }
+      }
+
+      // Test API call
+      async function testApi() {
+        const resultElement = document.getElementById("apiResult");
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+          resultElement.textContent =
+            "No token found! Please login or get a debug token first.";
+          resultElement.className = "result error";
+          return;
+        }
+
+        try {
+          resultElement.textContent = "Testing API...";
+          resultElement.className = "result";
+
+          const response = await fetch(
+            "http://localhost:8000/content/generate",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                idea_id: "test-id",
+                clip_ids: [1],
+                content_type: "article",
+                tone: "professional",
+                length: "medium",
+              }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (response.ok) {
+            resultElement.textContent =
+              "API call successful!\n" + JSON.stringify(data, null, 2);
+            resultElement.className = "result success";
+          } else {
+            resultElement.textContent =
+              "API call failed!\n" + JSON.stringify(data, null, 2);
+            resultElement.className = "result error";
+          }
+        } catch (error) {
+          resultElement.textContent = `Error: ${error.message}`;
+          resultElement.className = "result error";
+          console.error("API test error:", error);
+        }
+      }
+    </script>
+  </body>
+</html>

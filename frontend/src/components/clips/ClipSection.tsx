@@ -6,10 +6,10 @@ import { ClipCard } from "./ClipCard";
 interface ClipSectionProps {
   type: ClipType;
   clips: Clip[];
-  selectedClipId: number | null;
-  onClipEdit: (clipId: number) => void;
-  onClipDelete: (clipId: number) => void;
-  onClipContentChange: (clipId: number, content: string) => void;
+  selectedClipId: string | null;
+  onClipEdit: (clipId: string) => void;
+  onClipDelete: (clipId: string) => void;
+  onClipContentChange: (clipId: string, content: string) => void;
 }
 
 /**
