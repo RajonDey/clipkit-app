@@ -31,6 +31,25 @@ class Clip(BaseModel):
     created_at: str
     tags: List[Tag]
 
+# Request schemas for creating/updating
+class ClipCreate(BaseModel):
+    type: str
+    content: str  # Frontend uses content instead of value
+    idea_id: str
+    tags: Optional[List[str]] = []
+    lang: Optional[str] = None  # For code clips
+
+class IdeaCreate(BaseModel):
+    name: str
+    category: Optional[str] = None
+
+class IdeaUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+
+class TagCreate(BaseModel):
+    name: str
+
 class Idea(BaseModel):
     id: str
     name: str

@@ -104,12 +104,23 @@ interface ClipCreateData {
   value: string;
   tags?: string[];
   idea_id?: string;
+  lang?: string; // For code snippets
 }
 
 interface ClipUpdateData {
   type?: string;
   value?: string;
   tags?: string[];
+}
+
+interface IdeaCreateData {
+  name: string;
+  category?: string;
+}
+
+interface IdeaUpdateData {
+  name?: string;
+  category?: string;
 }
 
 // API methods for authentication
@@ -273,10 +284,13 @@ export const clips = {
   create: async (ideaId: string, data: ClipCreateData) => {
     try {
       console.log(`Creating clip for idea ${ideaId}:`, data);
-      // Add idea ID to clip data
+      // Add idea ID to clip data and transform field names to match backend
       const clipData = {
-        ...data,
+        type: data.type,
+        content: data.value, // Backend expects content instead of value
         idea_id: ideaId,
+        tags: data.tags || [],
+        lang: data.lang || null,
       };
       const response = await api.post("/clips", clipData);
       console.log("Clip creation response:", response.data);
