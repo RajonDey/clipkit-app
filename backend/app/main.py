@@ -8,6 +8,8 @@ from app.routes.db import router as db_router
 from app.routes.auth import router as auth_router
 from app.routes.content import router as content_router
 from app.routes.debug import router as debug_router
+from app.routes.test_user import router as test_user_router
+from app.routes.auth_debug import router as auth_debug_router
 import os
 
 # Check if we're in development mode
@@ -34,3 +36,5 @@ app.include_router(content_router, prefix="/content", tags=["content"])
 # Only include debug routes in development
 if DEBUG or True:  # Force enable for now, remove 'or True' in production
     app.include_router(debug_router)
+    app.include_router(test_user_router)
+    app.include_router(auth_debug_router)

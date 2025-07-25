@@ -1,6 +1,10 @@
 import axios from "axios";
 
+// Get the API URL from environment variable or fallback to localhost
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+console.log("API_URL configured as:", API_URL);
+console.log("NEXT_PUBLIC_API_URL from env:", process.env.NEXT_PUBLIC_API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
@@ -9,14 +13,54 @@ const api = axios.create({
   },
 });
 
+// Function to refresh the token
+const refreshToken = async () => {
+  try {
+    const refreshToken = localStorage.getItem("refreshToken");
+    if (!refreshToken) {
+      console.error("No refresh token available");
+      return null;
+    }
+
+    console.log("Attempting to refresh token...");
+    const response = await axios.post(`${API_URL}/auth/refresh`, {
+      refresh_token: refreshToken,
+    });
+
+    const { access_token, refresh_token } = response.data;
+
+    // Store the new tokens
+    localStorage.setItem("token", access_token);
+    localStorage.setItem("refreshToken", refresh_token);
+
+    console.log("Token refreshed successfully");
+    return access_token;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    // Clear tokens on refresh failure
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    return null;
+  }
+};
+
 // Add token to requests if it exists
 api.interceptors.request.use((config) => {
   // Only run this in browser environment (not during SSR)
   if (typeof window !== "undefined") {
+    // Don't add token for auth endpoints
+    if (
+      config.url &&
+      (config.url.includes("/auth/login") ||
+        config.url.includes("/auth/refresh"))
+    ) {
+      return config;
+    }
+
     let token = localStorage.getItem("token");
     console.log(
       "Token from localStorage:",
-      token ? `${token.substring(0, 15)}...` : "No token"
+      token ? `${token.substring(0, 15)}...` : "No token found"
     );
 
     if (token) {
@@ -25,9 +69,7 @@ api.interceptors.request.use((config) => {
         token = token.slice(1, -1);
         console.log("Cleaned up token by removing quotes");
         localStorage.setItem("token", token); // Save the clean token back
-      }
-
-      // Debug token structure
+      } // Debug token structure
       try {
         const parts = token.split(".");
         if (parts.length !== 3) {
@@ -52,6 +94,7 @@ api.interceptors.request.use((config) => {
               "Token is expired! Expired at:",
               new Date(payload.exp * 1000).toLocaleString()
             );
+            // We'll let the response interceptor handle the expired token
           }
         }
       } catch (e) {
@@ -67,6 +110,51 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Response interceptor to handle token expiration
+api.interceptors.response.use(
+  (response) => response, // Return successful responses as-is
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If error is 401 (Unauthorized) and we haven't tried to refresh yet
+    if (
+      error.response &&
+      error.response.status === 401 &&
+      !originalRequest._retry &&
+      originalRequest.url !== `${API_URL}/auth/refresh` &&
+      originalRequest.url !== `${API_URL}/auth/login`
+    ) {
+      console.log("401 error detected. Trying to refresh token...");
+
+      // Mark that we've tried to refresh for this request
+      originalRequest._retry = true;
+
+      // Try to refresh the token
+      const newToken = await refreshToken();
+
+      if (newToken) {
+        console.log("Using new token for request");
+        // Update the authorization header
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
+        // Retry the original request with the new token
+        return api(originalRequest);
+      } else {
+        console.log("Token refresh failed, redirecting to login");
+
+        // If we're in a browser context, redirect to login
+        if (typeof window !== "undefined") {
+          // Redirect to login page
+          window.location.href = "/auth";
+        }
+      }
+    }
+
+    // Return the error for other types of errors
+    return Promise.reject(error);
+  }
+);
 
 interface LoginData {
   username: string;
@@ -130,38 +218,136 @@ export const auth = {
       username: data.username,
     });
 
+    // For OAuth2 form authentication with FastAPI
     const formData = new URLSearchParams();
     formData.append("username", data.username);
     formData.append("password", data.password);
-    formData.append("grant_type", "password");
+
+    // Log the form data for debugging (don't log actual password)
+    console.log(
+      "Form data being sent:",
+      formData.toString().replace(/password=.+/, "password=REDACTED")
+    );
+    console.log("Content type:", "application/x-www-form-urlencoded");
+    console.log("Endpoint:", `${API_URL}/auth/login`);
 
     try {
       console.log("Sending login request to:", `${API_URL}/auth/login`);
-      const response = await api.post("/auth/login", formData, {
+
+      // Add a brief delay to ensure console logs appear in the right order
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Make sure we're using the right content type for FastAPI OAuth2 form
+      const response = await axios.post(`${API_URL}/auth/login`, formData, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
       });
-      console.log("Login response received:", response.status);
+
+      console.log("Login response received with status:", response.status);
+      console.log("Login response headers:", response.headers);
+      console.log("Login response data:", response.data);
+
+      // Store both access token and refresh token
+      if (response.data.access_token) {
+        localStorage.setItem("token", response.data.access_token);
+        console.log(
+          "Access token stored in localStorage, length:",
+          response.data.access_token.length
+        );
+      } else {
+        console.error("No access token in response");
+      }
+
+      if (response.data.refresh_token) {
+        localStorage.setItem("refreshToken", response.data.refresh_token);
+        console.log(
+          "Refresh token stored in localStorage, length:",
+          response.data.refresh_token.length
+        );
+      } else {
+        console.warn("No refresh token in response");
+      }
+
       return response.data;
     } catch (error) {
       console.error("Login request failed:", error);
+
+      // More detailed error logging
+      if (axios.isAxiosError(error)) {
+        console.error("Axios error detected");
+
+        if (error.response) {
+          console.error("Error status:", error.response.status);
+          console.error("Error data:", error.response.data);
+          console.error("Error headers:", error.response.headers);
+        } else if (error.request) {
+          console.error(
+            "Error request sent but no response received:",
+            error.request
+          );
+        } else {
+          console.error("Error setting up request:", error.message);
+        }
+
+        console.error("Error config:", error.config);
+      }
+
       throw error;
     }
   },
 
   register: async (data: RegisterData) => {
-    console.log("Preparing register request with data:", { email: data.email });
+    console.log("Preparing register request with data:", {
+      email: data.email,
+      name: data.name,
+      // Don't log passwords, even partially
+    });
 
     try {
       console.log("Sending register request to:", `${API_URL}/auth/register`);
-      const response = await api.post("/auth/register", data);
-      console.log("Register response received:", response.status);
+
+      // Use axios directly for consistent error handling
+      const response = await axios.post(`${API_URL}/auth/register`, data);
+
+      console.log("Register response received:", {
+        status: response.status,
+        data: response.data,
+      });
+
+      // Store both access token and refresh token
+      if (response.data.access_token) {
+        localStorage.setItem("token", response.data.access_token);
+        console.log("Access token stored in localStorage");
+      }
+
+      if (response.data.refresh_token) {
+        localStorage.setItem("refreshToken", response.data.refresh_token);
+        console.log("Refresh token stored in localStorage");
+      }
+
       return response.data;
     } catch (error) {
       console.error("Register request failed:", error);
+
+      // More detailed error logging
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Error status:", error.response.status);
+        console.error("Error data:", error.response.data);
+      }
+
       throw error;
     }
+  },
+
+  logout: () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    console.log("User logged out");
+  },
+
+  refreshToken: async () => {
+    return await refreshToken();
   },
 };
 

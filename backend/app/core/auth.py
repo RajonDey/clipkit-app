@@ -12,7 +12,8 @@ from app.db.session import SessionLocal
 # Configuration
 SECRET_KEY = "your-secret-key-keep-it-secret"  # Change this in production!
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 720  # Extend to 12 hours for better testing
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # Extended to 24 hours
+REFRESH_TOKEN_EXPIRE_DAYS = 30     # Refresh tokens valid for 30 days
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -40,7 +41,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     
     # Ensure sub field exists
@@ -50,6 +51,19 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
     print(f"Creating token with payload: {to_encode}")
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     print(f"Generated token: {encoded_jwt[:10]}...")
+    return encoded_jwt
+
+# Function to create refresh token
+def create_refresh_token(data: dict) -> str:
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode.update({"exp": expire, "token_type": "refresh"})
+    
+    # Ensure sub field exists
+    if "sub" not in to_encode:
+        raise ValueError("Token data must contain 'sub' field")
+    
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:

@@ -4,6 +4,10 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { AuthDiagnostic } from "@/components/auth/AuthDiagnostic";
+
+// Get API URL from environment variable
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface FormData {
   name?: string;
@@ -66,7 +70,19 @@ export default function AuthenticationPage() {
         };
       }
 
-      const response = await fetch(`http://localhost:8000${endpoint}`, {
+      // Log the request details
+      console.log(
+        `Sending ${
+          isLogin ? "login" : "registration"
+        } request to: ${API_URL}${endpoint}`
+      );
+      console.log("Headers:", headers);
+      console.log(
+        "Body:",
+        body instanceof URLSearchParams ? body.toString() : body
+      );
+
+      const response = await fetch(`${API_URL}${endpoint}`, {
         method: "POST",
         headers: headers,
         body: body,
@@ -110,7 +126,30 @@ export default function AuthenticationPage() {
       }
 
       // For login success
-      localStorage.setItem("token", data.token);
+      console.log("Login successful, response data:", data);
+
+      // Store the tokens
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+        console.log("Access token stored in localStorage");
+
+        // Verify token was stored properly
+        const storedToken = localStorage.getItem("token");
+        console.log(
+          `Verified token storage: ${storedToken ? "success" : "failed"}`
+        );
+        console.log(
+          `Stored token (first 15 chars): ${storedToken?.substring(0, 15)}...`
+        );
+      } else {
+        console.error("No access_token in response data:", data);
+      }
+
+      if (data.refresh_token) {
+        localStorage.setItem("refreshToken", data.refresh_token);
+        console.log("Refresh token stored in localStorage");
+      }
+
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -334,6 +373,18 @@ export default function AuthenticationPage() {
                     ? "Don't have an account? Sign up"
                     : "Already have an account? Sign in"}
                 </button>
+              </div>
+
+              {/* Auth Diagnostic Tool */}
+              <div className="mt-8 pt-6 border-t border-neutral-200">
+                <details className="text-sm text-neutral-500">
+                  <summary className="cursor-pointer font-medium">
+                    Troubleshooting Tools
+                  </summary>
+                  <div className="mt-3">
+                    <AuthDiagnostic />
+                  </div>
+                </details>
               </div>
             </motion.div>
           </div>

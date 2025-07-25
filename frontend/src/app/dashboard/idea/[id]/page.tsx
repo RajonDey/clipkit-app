@@ -8,7 +8,7 @@ import { ClipModal } from "@/components/clips/ClipModal";
 import { ClipSection } from "@/components/clips/ClipSection";
 import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
 import { AddClipModal } from "@/components/clips/AddClipModal";
-import { ContentWorkspace } from "@/components/ai/ContentWorkspace";
+import { ContentWorkspace } from "@/components/ai/ContentWorkspace/index";
 import axios from "axios";
 import * as api from "@/lib/api";
 
@@ -48,6 +48,8 @@ export default function Page() {
 
   // Modal for adding a new clip
   const [showAddClipModal, setShowAddClipModal] = useState(false);
+
+  const [showMobileEditor, setShowMobileEditor] = useState<boolean>(false);
 
   // Check if ID looks valid (UUID format)
   const isValidUUID = (id: string) => {
@@ -588,9 +590,144 @@ export default function Page() {
           </div>
         </section>
 
-        {/* Right Pane: AI/content editor area */}
-        <aside className="hidden md:flex flex-col w-1/2 xl:w-1/3 border-l border-neutral-200 bg-white/80 backdrop-blur-lg p-8 min-h-screen">
-          <ContentWorkspace idea={idea} clips={clips} />
+        {/* Mobile Content Preview - Appears when toggled */}
+        {showMobileEditor && (
+          <div className="fixed inset-0 bg-white z-50 md:hidden flex flex-col">
+            <div className="border-b border-neutral-200 p-4 flex justify-between items-center">
+              <h2 className="font-bold text-lg">Content Workspace</h2>
+              <button
+                className="p-2 rounded-full hover:bg-neutral-100"
+                onClick={() => setShowMobileEditor(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-auto p-6">
+              <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
+                <div className="p-6 flex flex-col items-center text-center">
+                  <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl">📝</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-neutral-800 mb-2">
+                    Create Your Content
+                  </h3>
+                  <p className="text-neutral-600 mb-6">
+                    Transform your clips into polished content with our
+                    AI-powered editor.
+                  </p>
+                  <a
+                    href={`/editor/${idea.id}`}
+                    className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <span>Open Full Editor</span>
+                    <span>→</span>
+                  </a>
+
+                  <div className="mt-6 pt-6 border-t border-neutral-100 w-full">
+                    <div className="flex justify-between text-sm text-neutral-500 mb-3">
+                      <span>Selected Clips:</span>
+                      <span>{clips.length}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Preview of recent clips */}
+                {clips.length > 0 && (
+                  <div className="border-t border-neutral-100 p-4">
+                    <h4 className="text-sm font-medium text-neutral-700 mb-3">
+                      Recent Clips
+                    </h4>
+                    <div className="space-y-2">
+                      {clips.slice(0, 3).map((clip) => (
+                        <div
+                          key={clip.id}
+                          className="text-xs text-neutral-600 bg-neutral-50 p-2 rounded truncate"
+                        >
+                          {clip.content.substring(0, 60)}...
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mobile Content Toggle Button */}
+        <button
+          className="md:hidden fixed bottom-24 right-24 z-30 bg-orange-500 text-white rounded-full p-4 shadow-lg"
+          onClick={() => setShowMobileEditor(true)}
+        >
+          <span className="text-xl">📝</span>
+        </button>
+
+        {/* Right Pane: Content Preview with Link to Editor */}
+        <aside className="hidden md:flex flex-col w-1/2 xl:w-1/3 border-l border-neutral-200 bg-white/80 backdrop-blur-lg p-6 min-h-screen overflow-y-auto">
+          <div className="sticky top-6">
+            <div className="flex flex-col mb-8">
+              <h2 className="text-2xl font-bold text-neutral-800 mb-2">
+                Content Workspace
+              </h2>
+              <p className="text-sm text-neutral-500">
+                Create and edit your content in our Notion-like editor.
+              </p>
+            </div>
+
+            {/* Content Workspace Card with CTA */}
+            <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
+              <div className="p-6 flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-2xl">📝</span>
+                </div>
+                <h3 className="text-xl font-bold text-neutral-800 mb-2">
+                  Ready to Create Content?
+                </h3>
+                <p className="text-neutral-600 mb-6">
+                  Transform your clips into cohesive, polished content with our
+                  AI-powered editor.
+                </p>
+                <a
+                  href={`/editor/${idea.id}`}
+                  className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                  target="_blank"
+                >
+                  <span>Open Full Editor</span>
+                  <span>→</span>
+                </a>
+
+                <div className="mt-6 pt-6 border-t border-neutral-100 w-full">
+                  <div className="flex justify-between text-sm text-neutral-500 mb-3">
+                    <span>Selected Clips:</span>
+                    <span>{clips.length}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-neutral-500">
+                    <span>Content Type:</span>
+                    <span>{idea.tags[0] || "Article"}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview of recent clips */}
+              {clips.length > 0 && (
+                <div className="border-t border-neutral-100 p-4">
+                  <h4 className="text-sm font-medium text-neutral-700 mb-3">
+                    Recent Clips
+                  </h4>
+                  <div className="space-y-2">
+                    {clips.slice(0, 3).map((clip) => (
+                      <div
+                        key={clip.id}
+                        className="text-xs text-neutral-600 bg-neutral-50 p-2 rounded truncate"
+                      >
+                        {clip.content.substring(0, 60)}...
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </aside>
       </main>
 

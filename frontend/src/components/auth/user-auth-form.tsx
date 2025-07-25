@@ -50,6 +50,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       if (isRegister && data.name) {
         console.log("Attempting to register user:", data.email);
         try {
+          // Add network request debugging
+          console.log("Browser location:", window.location.href);
+          console.log(
+            "Network status:",
+            navigator.onLine ? "Online" : "Offline"
+          );
+          console.log(
+            "API URL for registration:",
+            process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+          );
+
           result = await auth.register({
             email: data.email,
             password: data.password,
@@ -67,11 +78,42 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       } else {
         console.log("Attempting to login user:", data.email);
         try {
+          console.log("Sending login request with data:", {
+            username: data.email,
+            password: data.password.substring(0, 1) + "***", // Only show first character for security
+          });
+
+          // Add extra debugging to see how the request is formed and sent
+          console.log("API URL configuration:", {
+            baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
+          });
+
+          // Add network request debugging
+          console.log("Browser location:", window.location.href);
+          console.log(
+            "Network status:",
+            navigator.onLine ? "Online" : "Offline"
+          );
+
           result = await auth.login({
             username: data.email,
             password: data.password,
           });
-          console.log("Login response:", result);
+          console.log("Login response received:", result);
+
+          // Log the token details for debugging
+          if (result && result.access_token) {
+            console.log(
+              "Access token received, length:",
+              result.access_token.length
+            );
+            console.log(
+              "Refresh token received:",
+              result.refresh_token ? "Yes" : "No"
+            );
+          } else {
+            console.error("No access token in response");
+          }
         } catch (error) {
           console.error("Login API error:", error);
           throw new Error(
@@ -84,7 +126,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
       // Check if we have a valid token
       if (result && result.access_token) {
-        console.log("Setting token:", result.access_token);
+        console.log(
+          "Setting token:",
+          result.access_token.substring(0, 15) + "..."
+        );
+        console.log("Token type:", typeof result.access_token);
 
         // Ensure we don't store with quotes
         let tokenToStore = result.access_token;
@@ -97,13 +143,29 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           console.log("Removed quotes from token before storing");
         }
 
+        // Store both tokens
         localStorage.setItem("token", tokenToStore);
+
+        if (result.refresh_token) {
+          localStorage.setItem("refreshToken", result.refresh_token);
+          console.log("Refresh token stored");
+        } else {
+          console.warn("No refresh token received");
+        }
 
         // Verify the token was set correctly
         const storedToken = localStorage.getItem("token");
-        console.log("Verified stored token:", storedToken);
+        console.log(
+          "Verified stored token:",
+          storedToken ? storedToken.substring(0, 15) + "..." : "null"
+        );
+        console.log(
+          "Stored token length:",
+          storedToken ? storedToken.length : 0
+        );
 
         // Redirect to dashboard
+        console.log("Redirecting to dashboard...");
         router.push("/dashboard");
       } else {
         console.error("Invalid response format, missing access_token:", result);
