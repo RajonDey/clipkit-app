@@ -4,9 +4,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import ToolbarMenu from "./ToolbarMenu";
-import TipTapEditor from "./TipTap/TipTapEditor";
+import TipTapEditorComplete from "./TipTap/TipTapEditorComplete";
 import RegenerateDialog from "./RegenerateDialog";
 import "@/styles/markdown.css";
+import "./styles/editor-complete.css";
 
 interface EditorProps {
   content: string;
@@ -39,6 +40,16 @@ const Editor: React.FC<EditorProps> = ({
   const [showRegenerateDialog, setShowRegenerateDialog] =
     useState<boolean>(false);
 
+  // State for fullscreen mode
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
+  // Save content to localStorage when it changes
+  useEffect(() => {
+    if (content && ideaId) {
+      localStorage.setItem(`clipkit-content-${ideaId}`, content);
+    }
+  }, [content, ideaId]);
+
   // Handle regenerate with custom instructions
   const handleRegenerateWithInstructions = (instructions: string) => {
     if (onRegenerate) {
@@ -46,6 +57,8 @@ const Editor: React.FC<EditorProps> = ({
     }
     setShowRegenerateDialog(false);
   };
+
+  // Copy content to clipboard
   const copyToClipboard = () => {
     navigator.clipboard.writeText(content);
     // Add success message/toast here
@@ -87,87 +100,87 @@ const Editor: React.FC<EditorProps> = ({
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-
-    // Add success message/toast here
   };
 
-  // State for custom regeneration instructions
-  const [regenerateInstructions, setRegenerateInstructions] =
-    useState<string>("");
-
-  // Load saved content from localStorage on mount
-  useEffect(() => {
-    if (ideaId) {
-      const savedContent = localStorage.getItem(`clipkit-content-${ideaId}`);
-      if (savedContent && !content) {
-        setContent(savedContent);
-      }
-    }
-  }, [ideaId, content, setContent]);
-
-  // Save content to localStorage when it changes
-  useEffect(() => {
-    if (content && ideaId) {
-      localStorage.setItem(`clipkit-content-${ideaId}`, content);
-    }
-  }, [content, ideaId]);
-
-  // Handle regeneration with custom instructions
-  const handleRegenerate = () => {
-    if (regenerateInstructions.trim()) {
-      // Here we would call the API with custom instructions
-      // For now, just log it
-      console.log("Regenerating with instructions:", regenerateInstructions);
-      // TODO: Implement API call with custom instructions
-
-      setShowRegenerateDialog(false);
-    }
+  // Toggle fullscreen mode
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
   };
 
   return (
-    <div className="flex-1 flex flex-col border border-neutral-200 rounded-lg overflow-hidden bg-white shadow-sm">
-      <div className="border-b border-neutral-200 px-4 py-2 bg-neutral-50 flex justify-between items-center">
-        <h3 className="font-medium">Generated Content</h3>
-        {content && (
-          <div className="space-x-2">
-            <button
-              className="text-xs text-blue-600 hover:text-blue-800 px-2 py-1 rounded border border-blue-200 hover:bg-blue-50"
-              onClick={copyToClipboard}
-            >
-              Copy
-            </button>
-            <button
-              className="text-xs text-purple-600 hover:text-purple-800 px-2 py-1 rounded border border-purple-200 hover:bg-purple-50"
-              onClick={() => setShowRegenerateDialog(true)}
-            >
-              Regenerate
-            </button>
-            <ToolbarMenu
-              showExportMenu={showExportMenu}
-              setShowExportMenu={setShowExportMenu}
-              onExport={exportContent}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              content={content}
-              setEditedContent={setEditedContent}
-            />
+    <div
+      className={`editor-complete-wrapper ${
+        isFullscreen ? "fullscreen-mode" : ""
+      }`}
+    >
+      {/* Cleaner Editor Header */}
+      <div className="editor-header">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-neutral-900">
+                Content Editor
+              </h3>
+              <p className="text-sm text-neutral-500">
+                {content
+                  ? "Edit and refine your generated content"
+                  : "Generate content from your clips"}
+              </p>
+            </div>
           </div>
-        )}
+
+          {content && (
+            <div className="flex items-center gap-2">
+              {/* Primary Actions */}
+              <button
+                className="px-3 py-2 text-sm bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors flex items-center gap-2"
+                onClick={copyToClipboard}
+                title="Copy to clipboard"
+              >
+                <span>📋</span>
+                <span className="hidden sm:inline">Copy</span>
+              </button>
+
+              <button
+                className="px-3 py-2 text-sm bg-orange-100 hover:bg-orange-200 text-orange-700 rounded-lg transition-colors flex items-center gap-2"
+                onClick={() => setShowRegenerateDialog(true)}
+                title="Regenerate with new instructions"
+              >
+                <span>🔄</span>
+                <span className="hidden sm:inline">Regenerate</span>
+              </button>
+
+              {/* Secondary Actions Dropdown */}
+              <div className="relative">
+                <ToolbarMenu
+                  showExportMenu={showExportMenu}
+                  setShowExportMenu={setShowExportMenu}
+                  onExport={exportContent}
+                  isEditing={isEditing}
+                  setIsEditing={setIsEditing}
+                  content={content}
+                  setEditedContent={setEditedContent}
+                  isFullscreen={isFullscreen}
+                  toggleFullscreen={toggleFullscreen}
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex-1 p-4 overflow-y-auto bg-white">
+      <div className="editor-content">
         {content ? (
           isEditing ? (
             <div className="h-full flex flex-col">
-              <TipTapEditor
-                content={editedContent}
+              <TipTapEditorComplete
+                content={content}
                 setContent={setEditedContent}
-                availableClips={availableClips}
               />
 
-              <div className="flex justify-end mt-4 space-x-2">
+              <div className="editor-action-bar">
                 <button
-                  className="text-xs text-red-600 hover:text-red-800 px-3 py-1 rounded border border-red-200 hover:bg-red-50"
+                  className="cancel"
                   onClick={() => {
                     setIsEditing(false);
                     setEditedContent(content); // Reset to original
@@ -176,7 +189,7 @@ const Editor: React.FC<EditorProps> = ({
                   Cancel
                 </button>
                 <button
-                  className="text-xs text-green-600 hover:text-green-800 px-3 py-1 rounded border border-green-200 hover:bg-green-50"
+                  className="save"
                   onClick={() => {
                     setContent(editedContent);
                     setIsEditing(false);
@@ -187,7 +200,7 @@ const Editor: React.FC<EditorProps> = ({
               </div>
             </div>
           ) : (
-            <div className="prose max-w-none markdown-content">
+            <div className="editor-markdown-content markdown-body">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw]}
@@ -197,16 +210,27 @@ const Editor: React.FC<EditorProps> = ({
             </div>
           )
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-neutral-400">
-            <span className="text-4xl mb-4">🤖✨</span>
-            <p className="text-center max-w-md">
+          <div className="editor-empty-state">
+            <span className="editor-empty-icon">✨</span>
+            <p>
               Configure your parameters and generate content from your clips.
               <br />
-              Your generated content will appear here.
+              <span style={{ opacity: 0.7, fontSize: "0.9em" }}>
+                Your generated content will appear here.
+              </span>
             </p>
           </div>
         )}
       </div>
+
+      {/* Regenerate Dialog */}
+      {showRegenerateDialog && (
+        <RegenerateDialog
+          isOpen={showRegenerateDialog}
+          onClose={() => setShowRegenerateDialog(false)}
+          onRegenerate={handleRegenerateWithInstructions}
+        />
+      )}
     </div>
   );
 };

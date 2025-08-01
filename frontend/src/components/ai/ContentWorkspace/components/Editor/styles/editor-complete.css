@@ -1,0 +1,203 @@
+/* Editor Complete Styles */
+.editor-complete-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.editor-complete-wrapper.fullscreen-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  border-radius: 0;
+}
+
+/* Cleaner Header Design */
+.editor-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+  flex-shrink: 0;
+}
+
+.editor-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.editor-header p {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Content Area */
+.editor-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-markdown-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.editor-markdown-content h1,
+.editor-markdown-content h2,
+.editor-markdown-content h3,
+.editor-markdown-content h4,
+.editor-markdown-content h5,
+.editor-markdown-content h6 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.editor-markdown-content h1 {
+  font-size: 2rem;
+}
+
+.editor-markdown-content h2 {
+  font-size: 1.5rem;
+}
+
+.editor-markdown-content h3 {
+  font-size: 1.25rem;
+}
+
+.editor-markdown-content p {
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.editor-markdown-content ul,
+.editor-markdown-content ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.editor-markdown-content li {
+  margin-bottom: 0.25rem;
+}
+
+.editor-markdown-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.editor-markdown-content code {
+  background: #f3f4f6;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  color: #dc2626;
+}
+
+.editor-markdown-content pre {
+  background: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.editor-markdown-content pre code {
+  background: none;
+  padding: 0;
+  color: #374151;
+}
+
+/* Empty State */
+.editor-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.editor-empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.editor-empty-state p {
+  font-size: 1rem;
+  line-height: 1.5;
+  max-width: 400px;
+}
+
+/* Action Bar for Edit Mode */
+.editor-action-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.editor-action-bar button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.editor-action-bar .cancel {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.editor-action-bar .cancel:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.editor-action-bar .save {
+  background: #059669;
+  border: 1px solid #059669;
+  color: white;
+}
+
+.editor-action-bar .save:hover {
+  background: #047857;
+  border-color: #047857;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .editor-header {
+    padding: 1rem;
+  }
+
+  .editor-markdown-content {
+    padding: 1rem;
+  }
+
+  .editor-action-bar {
+    padding: 1rem;
+  }
+}

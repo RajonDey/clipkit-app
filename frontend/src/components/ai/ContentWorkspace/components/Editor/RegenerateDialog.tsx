@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./regenerate-dialog.css";
+import "./styles/regenerate-dialog.css";
 
 interface RegenerateDialogProps {
   isOpen: boolean;

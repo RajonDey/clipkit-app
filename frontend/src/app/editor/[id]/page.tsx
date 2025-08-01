@@ -193,36 +193,62 @@ export default function EditorPage() {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col ml-16 sm:ml-64 transition-all duration-300">
-        {/* Header */}
-        <header className="bg-white border-b border-neutral-200 p-4 flex justify-between items-center sticky top-0 z-10">
-          <div className="flex items-center gap-4">
-            <Link
-              href={`/dashboard/idea/${ideaId}`}
-              className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 rounded-lg text-neutral-700 flex items-center gap-2"
-            >
-              <span>←</span>
-              <span>Back to Idea</span>
-            </Link>
-            <h1 className="text-xl font-bold text-neutral-800">
-              Editing: {idea.title}
-            </h1>
-          </div>
+        {/* Enhanced Header */}
+        <header className="bg-white border-b border-neutral-200 px-8 py-6">
+          <div className="w-full">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <Link
+                  href={`/dashboard/idea/${ideaId}`}
+                  className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600 transition-colors flex items-center gap-2"
+                >
+                  <span>←</span>
+                  <span className="hidden sm:inline">Back to Idea</span>
+                </Link>
+                <div className="h-8 w-px bg-neutral-200"></div>
+                <div>
+                  <div className="flex items-center gap-2 text-sm text-neutral-500">
+                    <span>Editing:</span>
+                    <span className="font-medium text-neutral-900">
+                      {idea.title}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-4 mt-1">
+                    <div className="flex items-center gap-2 text-xs text-neutral-500">
+                      <span>📝</span>
+                      <span>{clips.length} clips available</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-neutral-500">
+                      <span>🤖</span>
+                      <span>AI-powered editor</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-neutral-500">
+                      <span>💾</span>
+                      <span>Auto-save enabled</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-          <div className="flex items-center gap-3">
-            <PrintButton />
-            <a
-              href={`/dashboard/idea/${ideaId}`}
-              className="px-3 py-1.5 bg-green-100 hover:bg-green-200 rounded-lg text-green-700 flex items-center gap-2"
-              title="Save and go back to idea"
-            >
-              <span>Save & Exit</span>
-            </a>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <PrintButton />
+                <Link
+                  href={`/dashboard/idea/${ideaId}`}
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                  title="Save and go back to idea"
+                >
+                  <span>✓</span>
+                  <span className="hidden sm:inline">Save & Exit</span>
+                </Link>
+              </div>
+            </div>
           </div>
         </header>
 
         {/* Editor Content */}
         <div className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
+          <div className="w-full">
             <ContentWorkspace idea={idea} clips={clips} dedicatedPage={true} />
           </div>
         </div>

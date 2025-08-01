@@ -1,0 +1,121 @@
+/* ContentWorkspace Styles */
+.notion-inspired-container {
+  min-height: 100vh;
+  background: #fafafa;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+}
+
+.notion-inspired-container.dedicated-page {
+  min-height: calc(100vh - 80px); /* Account for header */
+  background: #ffffff;
+}
+
+.notion-inspired-container.compact-mode {
+  min-height: auto;
+  background: transparent;
+}
+
+.workspace-layout {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+}
+
+.dedicated-page .workspace-layout {
+  height: 100%;
+}
+
+.workspace-sidebar {
+  width: 400px;
+  background: white;
+  border-right: 1px solid #e5e7eb;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  overflow-y: auto;
+}
+
+.dedicated-page .workspace-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+.workspace-editor {
+  flex: 1;
+  background: white;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+}
+
+.dedicated-page .workspace-editor {
+  min-height: calc(100vh - 120px);
+  border-radius: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .workspace-layout {
+    flex-direction: column;
+  }
+
+  .workspace-sidebar {
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem;
+  }
+
+  .workspace-editor {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .workspace-sidebar,
+  .workspace-editor {
+    padding: 1rem;
+  }
+}
+
+/* Enhanced Visual Hierarchy */
+.workspace-editor {
+  transition: all 0.2s ease-in-out;
+}
+
+.workspace-editor:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Loading States */
+.workspace-layout.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Focus States */
+.workspace-sidebar:focus-within,
+.workspace-editor:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .workspace-sidebar {
+    display: none;
+  }
+
+  .workspace-editor {
+    border: none;
+    box-shadow: none;
+  }
+}

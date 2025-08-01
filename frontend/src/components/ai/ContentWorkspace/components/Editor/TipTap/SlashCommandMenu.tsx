@@ -45,7 +45,7 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
       const { selection } = state;
       const { from } = selection;
 
-      // Get text from the cursor position up to 10 characters back
+      // Get text from the cursor position up to 20 characters back
       const textBefore = state.doc.textBetween(Math.max(0, from - 20), from);
 
       // Extract search query after the slash
@@ -119,31 +119,63 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
   const allCommands = [
     {
       title: "Heading 1",
+      description: "Large section heading",
       command: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
       icon: "H1",
+      category: "text",
     },
     {
       title: "Heading 2",
+      description: "Medium section heading",
       command: () => editor.chain().focus().toggleHeading({ level: 2 }).run(),
       icon: "H2",
+      category: "text",
+    },
+    {
+      title: "Heading 3",
+      description: "Small section heading",
+      command: () => editor.chain().focus().toggleHeading({ level: 3 }).run(),
+      icon: "H3",
+      category: "text",
     },
     {
       title: "Bullet List",
+      description: "Create a bullet list",
       command: () => editor.chain().focus().toggleBulletList().run(),
       icon: "•",
+      category: "list",
     },
     {
       title: "Numbered List",
+      description: "Create a numbered list",
       command: () => editor.chain().focus().toggleOrderedList().run(),
       icon: "1.",
+      category: "list",
     },
     {
       title: "Code Block",
+      description: "Add a code block",
       command: () => editor.chain().focus().toggleCodeBlock().run(),
       icon: "<>",
+      category: "code",
+    },
+    {
+      title: "Inline Code",
+      description: "Add inline code",
+      command: () => editor.chain().focus().toggleCode().run(),
+      icon: "`",
+      category: "code",
+    },
+    {
+      title: "Blockquote",
+      description: "Add a quote block",
+      command: () => editor.chain().focus().toggleBlockquote().run(),
+      icon: "❝",
+      category: "text",
     },
     {
       title: "Image",
+      description: "Insert an image",
       command: () => {
         const url = prompt("Enter image URL:");
         if (url) {
@@ -151,14 +183,23 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
         }
       },
       icon: "🖼️",
+      category: "media",
     },
     {
-      title: "Blockquote",
-      command: () => editor.chain().focus().toggleBlockquote().run(),
-      icon: "❝",
+      title: "Link",
+      description: "Add a link",
+      command: () => {
+        const url = prompt("Enter URL:");
+        if (url) {
+          editor.chain().focus().setLink({ href: url }).run();
+        }
+      },
+      icon: "🔗",
+      category: "text",
     },
     {
       title: "Table",
+      description: "Insert a table",
       command: () => {
         // Insert a basic 3x3 table as HTML
         editor
@@ -190,6 +231,14 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
           .run();
       },
       icon: "📊",
+      category: "table",
+    },
+    {
+      title: "Horizontal Rule",
+      description: "Add a divider",
+      command: () => editor.chain().focus().setHorizontalRule().run(),
+      icon: "—",
+      category: "text",
     },
   ];
 
@@ -197,7 +246,8 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
   const filteredCommands = allCommands.filter(
     (command) =>
       searchQuery === "" ||
-      command.title.toLowerCase().includes(searchQuery.toLowerCase())
+      command.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      command.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Reset selected index when filtered commands change
@@ -209,15 +259,17 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
 
   return (
     <div className="slash-command-menu" ref={menuRef}>
-      <input
-        type="text"
-        className="slash-command-input"
-        placeholder="Search for a command..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onClick={(e) => e.stopPropagation()}
-        autoFocus
-      />
+      <div className="slash-command-header">
+        <input
+          type="text"
+          className="slash-command-input"
+          placeholder="Search for a command..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          autoFocus
+        />
+      </div>
       <div className="slash-command-menu-items">
         {filteredCommands.length > 0 ? (
           filteredCommands.map((item, index) => (
@@ -239,7 +291,12 @@ const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
               onMouseEnter={() => setSelectedIndex(index)}
             >
               <span className="slash-command-icon">{item.icon}</span>
-              <span className="slash-command-title">{item.title}</span>
+              <div className="slash-command-content">
+                <span className="slash-command-title">{item.title}</span>
+                <span className="slash-command-description">
+                  {item.description}
+                </span>
+              </div>
             </button>
           ))
         ) : (

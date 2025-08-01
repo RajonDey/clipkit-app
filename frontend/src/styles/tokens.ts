@@ -36,28 +36,43 @@ export const colors = {
 export const clipTypeStyles = {
   text: {
     color: "border-orange-400 bg-orange-50",
-    icon: "📝",
+    icon: "text",
     label: "Text",
+    bgColor: "bg-orange-50",
+    borderColor: "border-orange-400",
+    textColor: "text-orange-700",
   },
   image: {
     color: "border-blue-400 bg-blue-50",
-    icon: "🖼️",
+    icon: "image",
     label: "Images",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-400",
+    textColor: "text-blue-700",
   },
   code: {
     color: "border-neutral-500 bg-neutral-100",
-    icon: "💻",
+    icon: "code",
     label: "Code",
+    bgColor: "bg-neutral-100",
+    borderColor: "border-neutral-500",
+    textColor: "text-neutral-700",
   },
   link: {
     color: "border-yellow-400 bg-yellow-50",
-    icon: "🔗",
+    icon: "link",
     label: "Links",
+    bgColor: "bg-yellow-50",
+    borderColor: "border-yellow-400",
+    textColor: "text-yellow-700",
   },
   video: {
     color: "border-purple-400 bg-purple-50",
-    icon: "🎬",
+    icon: "video",
     label: "Videos",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-400",
+    textColor: "text-purple-700",
   },
 };
 
@@ -66,8 +81,10 @@ export const buttonStyles = {
   secondary: `px-4 py-2 rounded ${colors.secondary.light} ${colors.secondary.hover} transition-all`,
   danger: `px-4 py-2 rounded ${colors.danger.medium} ${colors.danger.hover} transition-all`,
   outline: `px-4 py-2 rounded bg-white border border-neutral-200 hover:bg-orange-50 text-neutral-700 font-medium transition-all`,
-  icon: `p-1 rounded hover:bg-orange-100 text-orange-600`,
-  iconDanger: `p-1 rounded hover:bg-red-100 text-red-500`,
+  icon: `p-1.5 rounded hover:bg-orange-100 text-orange-600 transition-colors`,
+  iconDanger: `p-1.5 rounded hover:bg-red-100 text-red-500 transition-colors`,
+  iconNeutral: `p-1.5 rounded hover:bg-neutral-100 text-neutral-500 transition-colors`,
+  iconBlue: `p-1.5 rounded hover:bg-blue-100 text-blue-500 transition-colors`,
 };
 
 export const inputStyles = {

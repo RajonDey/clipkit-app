@@ -1,7 +1,30 @@
-import { Loader2 } from "lucide-react";
+import {
+  Loader2,
+  Edit,
+  Trash2,
+  Copy,
+  ExternalLink,
+  FileText,
+  Image,
+  Code,
+  Link,
+  Video,
+  X,
+} from "lucide-react";
 
 export const Icons = {
   spinner: Loader2,
+  edit: Edit,
+  delete: Trash2,
+  copy: Copy,
+  externalLink: ExternalLink,
+  close: X,
+  // Content type icons
+  text: FileText,
+  image: Image,
+  code: Code,
+  link: Link,
+  video: Video,
   idea: (props: React.SVGProps<SVGSVGElement>) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

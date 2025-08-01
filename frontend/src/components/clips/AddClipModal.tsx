@@ -377,136 +377,131 @@ export const AddClipModal: React.FC<AddClipModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full border border-neutral-200 relative">
-        <button
-          className="absolute top-3 right-3 text-neutral-400 hover:text-orange-500 text-2xl"
-          onClick={onClose}
-          title="Close"
-        >
-          ×
-        </button>
-
-        <h2 className="text-2xl font-bold mb-1 text-neutral-800">
-          Add New Clip
-        </h2>
-
-        <p className="text-sm text-neutral-600 mb-2">
-          Choose a content type below to add to your idea
-        </p>
-
-        {/* Helper text */}
-        {renderHelperText()}
-
-        {/* Tabs */}
-        <div className="flex gap-1 mb-4 overflow-x-auto">
-          {contentTypes.map((type) => {
-            const hasContent =
-              clipContents[type.value as ClipType]?.trim().length > 0;
-
-            return (
-              <button
-                key={type.value}
-                className={`px-3 py-2 rounded-lg font-medium flex items-center gap-1.5 text-sm transition-all ${
-                  activeTab === type.value
-                    ? `bg-${
-                        type.value === "text"
-                          ? "orange"
-                          : type.value === "image"
-                          ? "blue"
-                          : type.value === "video"
-                          ? "purple"
-                          : type.value === "code"
-                          ? "neutral"
-                          : "yellow"
-                      }-100 text-${
-                        type.value === "text"
-                          ? "orange"
-                          : type.value === "image"
-                          ? "blue"
-                          : type.value === "video"
-                          ? "purple"
-                          : type.value === "code"
-                          ? "neutral"
-                          : "yellow"
-                      }-700 border-b-2 border-${
-                        type.value === "text"
-                          ? "orange"
-                          : type.value === "image"
-                          ? "blue"
-                          : type.value === "video"
-                          ? "purple"
-                          : type.value === "code"
-                          ? "neutral"
-                          : "yellow"
-                      }-500`
-                    : "hover:bg-neutral-100 text-neutral-500"
-                }`}
-                onClick={() => setActiveTab(type.value as ClipType)}
-              >
-                <span>
-                  {type.value === "text" && "📝"}
-                  {type.value === "link" && "🔗"}
-                  {type.value === "image" && "🖼️"}
-                  {type.value === "video" && "🎬"}
-                  {type.value === "code" && "💻"}
-                </span>
-                {type.label}
-                {activeTab === type.value && (
-                  <span className="ml-1 px-1 py-0.5 bg-green-100 text-green-800 text-xs rounded font-normal">
-                    Active
-                  </span>
-                )}
-                {hasContent && (
-                  <span
-                    className="ml-1 w-2 h-2 rounded-full bg-green-500"
-                    title="Content ready"
-                  ></span>
-                )}
-              </button>
-            );
-          })}
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden shadow-2xl">
+        {/* Enhanced Header */}
+        <div className="flex items-center justify-between p-8 border-b border-neutral-200">
+          <div>
+            <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+              Add New Clip
+            </h2>
+            <p className="text-neutral-500">
+              Organize your ideas by adding different types of content
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-500 transition-colors"
+            title="Close modal"
+          >
+            <span className="text-xl">×</span>
+          </button>
         </div>
 
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit}
-          onKeyDown={handleKeyDown}
-          className="space-y-4"
-        >
-          {renderTabContent()}
-
-          <div className="flex gap-2 items-center">
-            <input
-              className={`${inputStyles.default} ${inputStyles.focus}`}
-              placeholder="Tag (optional)"
-              value={tag}
-              onChange={(e) => setTag(e.target.value)}
-            />
+        {/* Content */}
+        <div className="p-8">
+          {/* Clip Type Selection */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-neutral-900 mb-4">
+              Choose Content Type
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {contentTypes.map((type) => (
+                <button
+                  key={type.value}
+                  onClick={() => setActiveTab(type.value as ClipType)}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    activeTab === type.value
+                      ? "border-orange-500 bg-orange-50 text-orange-700"
+                      : "border-neutral-200 hover:border-neutral-300 bg-white text-neutral-700"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">
+                      {type.value === "text" && "📝"}
+                      {type.value === "image" && "🖼️"}
+                      {type.value === "video" && "🎥"}
+                      {type.value === "link" && "🔗"}
+                      {type.value === "code" && "💻"}
+                    </span>
+                    <div className="text-left">
+                      <div className="font-medium">{type.label}</div>
+                      <div className="text-xs text-neutral-500">
+                        {type.value === "text" && "Add text notes and ideas"}
+                        {type.value === "image" && "Add images and screenshots"}
+                        {type.value === "video" && "Add video links and embeds"}
+                        {type.value === "link" &&
+                          "Add web links and references"}
+                        {type.value === "code" && "Add code snippets"}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="flex justify-end gap-2 mt-4">
+          {/* Content Input */}
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                {activeTab === "text" && "Text Content"}
+                {activeTab === "image" && "Image URL"}
+                {activeTab === "video" && "Video URL"}
+                {activeTab === "link" && "Link URL"}
+                {activeTab === "code" && "Code Snippet"}
+              </label>
+              {renderTabContent()}
+            </div>
+
+            {/* Tag Input */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Tag (optional)
+              </label>
+              <input
+                type="text"
+                value={tag}
+                onChange={(e) => setTag(e.target.value)}
+                placeholder="e.g., research, inspiration, todo"
+                className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              />
+            </div>
+
+            {/* Helper Text */}
+            {renderHelperText()}
+          </div>
+        </div>
+
+        {/* Enhanced Footer */}
+        <div className="flex items-center justify-between p-8 border-t border-neutral-200 bg-neutral-50">
+          <div className="text-sm text-neutral-500">
+            {activeTab === "text" && "📝 Add your thoughts, notes, or ideas"}
+            {activeTab === "image" && "🖼️ Paste an image URL to include it"}
+            {activeTab === "video" && "🎥 Add YouTube or other video links"}
+            {activeTab === "link" && "🔗 Save important web references"}
+            {activeTab === "code" && "💻 Store code snippets and examples"}
+          </div>
+          <div className="flex items-center gap-3">
             <button
-              type="button"
               onClick={onClose}
-              className={buttonStyles.secondary}
+              className="px-6 py-3 text-neutral-700 hover:text-neutral-900 transition-colors"
             >
               Cancel
             </button>
             <button
-              type="submit"
-              className={`${buttonStyles.primary} flex items-center gap-2 ${
-                !isCurrentContentValid() ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              onClick={handleSubmit}
               disabled={!isCurrentContentValid()}
-              title={`Add only the ${activeTab} content as a new clip`}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                isCurrentContentValid()
+                  ? "bg-orange-500 hover:bg-orange-600 text-white"
+                  : "bg-neutral-200 text-neutral-400 cursor-not-allowed"
+              }`}
             >
-              <span className="text-lg">➕</span> Add{" "}
-              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Clip
-              <span className="ml-1 text-xs opacity-75">(Ctrl+Enter)</span>
+              Add Clip
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { Clip, Idea } from "@/types/idea";
-import ContentHeader from "./ContentHeader";
-import ParametersSection from "./ParametersSection";
-import ClipSelection from "./ClipSelection";
-import Editor from "./Editor/EditorComplete"; // Use the enhanced editor
-import MediaPreview from "./MediaPreview";
+import ContentHeader from "./components/ContentHeader";
+import ParametersSection from "./components/ParametersSection";
+import ClipSelection from "./components/ClipSelection";
+import Editor from "./components/Editor/EditorComplete"; // Use the enhanced editor
+import MediaPreview from "./components/MediaPreview";
 import { useContentGeneration } from "./hooks/useContentGeneration";
-import "./content-workspace.css"; // Import Notion-like styling
+import "./styles/content-workspace.css"; // Import Notion-like styling
 
 // Types for content generation
 interface ContentGenerationParams {
@@ -156,11 +156,13 @@ export const ContentWorkspace: React.FC<ContentWorkspaceProps> = ({
         compactMode ? "compact-mode" : ""
       } ${dedicatedPage ? "dedicated-page" : ""}`}
     >
-      <ContentHeader />
+      {!dedicatedPage && <ContentHeader />}
 
-      <div className="workspace-layout flex flex-col lg:flex-row lg:gap-4">
-        <div className="workspace-sidebar lg:w-1/3 mb-4 lg:mb-0">
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-100 p-4 mb-4">
+      <div
+        className={`workspace-layout ${dedicatedPage ? "dedicated-page" : ""}`}
+      >
+        <div className="workspace-sidebar">
+          <div>
             <ParametersSection
               params={params}
               setParams={setParams}
@@ -171,7 +173,7 @@ export const ContentWorkspace: React.FC<ContentWorkspaceProps> = ({
             />
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-neutral-100 p-4">
+          <div>
             <ClipSelection
               clips={clips}
               orderedClips={orderedClips}
@@ -187,7 +189,7 @@ export const ContentWorkspace: React.FC<ContentWorkspaceProps> = ({
           </div>
         </div>
 
-        <div className="workspace-editor lg:w-2/3 bg-white rounded-xl shadow-sm border border-neutral-100 p-4">
+        <div className="workspace-editor">
           <Editor
             content={generatedContent}
             setContent={setGeneratedContent}

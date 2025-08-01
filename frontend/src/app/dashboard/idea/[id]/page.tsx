@@ -8,7 +8,7 @@ import { ClipModal } from "@/components/clips/ClipModal";
 import { ClipSection } from "@/components/clips/ClipSection";
 import { FloatingActionButton } from "@/components/ui/FloatingActionButton";
 import { AddClipModal } from "@/components/clips/AddClipModal";
-import { ContentWorkspace } from "@/components/ai/ContentWorkspace/index";
+import { Icons } from "@/components/icons";
 import axios from "axios";
 import * as api from "@/lib/api";
 
@@ -48,8 +48,6 @@ export default function Page() {
 
   // Modal for adding a new clip
   const [showAddClipModal, setShowAddClipModal] = useState(false);
-
-  const [showMobileEditor, setShowMobileEditor] = useState<boolean>(false);
 
   // Check if ID looks valid (UUID format)
   const isValidUUID = (id: string) => {
@@ -386,190 +384,211 @@ export default function Page() {
       {/* Sidebar */}
       <Sidebar active="Ideas" />
 
-      {/* Main Workspace Split Pane */}
-      <main className="flex-1 flex flex-row min-h-screen ml-16 sm:ml-64 transition-all duration-300">
-        {/* Left Pane: Idea details, tabs, clips, add clip */}
-        <section className="w-full md:w-1/2 xl:w-2/3 flex flex-col items-center px-2 sm:px-8 py-8">
-          <div className="w-full mx-auto bg-white rounded-2xl shadow-xl p-6 sm:p-10 border border-neutral-200">
-            {/* Enhanced Header with Add Clip */}
-            <div className="mb-10 bg-gradient-to-r from-orange-50 via-white to-blue-50 rounded-2xl p-8 border border-neutral-200 shadow flex flex-col gap-6">
-              {/* Header row: title, description, tags, actions */}
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    {isEditingTitle ? (
-                      <input
-                        className="text-4xl font-extrabold tracking-tight text-neutral-900 bg-white border border-orange-200 rounded px-2 py-1"
-                        value={editedTitle}
-                        autoFocus
-                        onChange={(e) => setEditedTitle(e.target.value)}
-                        onBlur={handleUpdateTitle}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleUpdateTitle();
-                          } else if (e.key === "Escape") {
-                            setIsEditingTitle(false);
-                            setEditedTitle(idea.title);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <h1 className="text-4xl font-extrabold tracking-tight text-neutral-900 mb-0">
-                        {idea.title}
-                        <button
-                          className="ml-2 text-orange-500 hover:text-orange-700 text-xl"
-                          title="Edit title"
-                          onClick={() => {
-                            setIsEditingTitle(true);
-                            setEditedTitle(idea.title);
-                          }}
-                        >
-                          ✏️
-                        </button>
-                      </h1>
-                    )}
-                  </div>
-                  <div className="text-neutral-500 text-lg mb-2">
-                    {idea.description}
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-2 items-center">
-                    {idea.tags.map((tag: string) => (
-                      <span
-                        key={tag}
-                        className="px-2 py-1 text-xs rounded bg-neutral-100 text-neutral-700 font-medium border border-neutral-200"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                    <button
-                      className="ml-2 px-2 py-1 rounded bg-orange-100 text-orange-700 text-xs border border-orange-200 hover:bg-orange-200"
-                      title="Add tag"
-                      onClick={() => setShowTagInput(true)}
-                    >
-                      +
-                    </button>
-                    {showTagInput && (
-                      <input
-                        className="ml-2 px-2 py-1 rounded border border-neutral-200 text-xs"
-                        placeholder="New tag"
-                        value={newTag}
-                        autoFocus
-                        onChange={(e) => setNewTag(e.target.value)}
-                        onBlur={() => {
-                          setShowTagInput(false);
-                          if (newTag.trim()) {
-                            setIdea({
-                              ...idea!,
-                              tags: [...idea!.tags, newTag.trim()],
-                            });
-                            setNewTag("");
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            setShowTagInput(false);
-                            if (newTag.trim()) {
-                              setIdea({
-                                ...idea!,
-                                tags: [...idea!.tags, newTag.trim()],
-                              });
-                              setNewTag("");
-                            }
-                          }
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-                {/* Actions dropdown */}
-                <div className="relative flex gap-2 mt-2 md:mt-0">
-                  <div className="group">
-                    <button className="flex items-center gap-2">
-                      <span className="text-lg">⚙️</span>
-                      <span className="hidden sm:inline">Organize Clips</span>
-                    </button>
-                    <div className="absolute right-0 mt-0 z-10 hidden group-hover:block bg-white border border-orange-200 rounded shadow-xl min-w-[180px]">
-                      <button
-                        className="w-full text-left px-4 py-2 bg-white hover:bg-orange-100 text-neutral-700 flex items-center gap-2 rounded-t-xl transition whitespace-nowrap"
-                        title="Edit Idea"
-                      >
-                        <span className="text-lg">✏️</span> Edit Idea
-                      </button>
-                      <button
-                        className="w-full text-left px-4 py-2 bg-white hover:bg-red-50 text-red-600 flex items-center gap-2 transition whitespace-nowrap"
-                        title="Delete Idea"
-                        onClick={async () => {
-                          if (
-                            window.confirm(
-                              "Are you sure you want to delete this idea?"
-                            )
-                          ) {
-                            try {
-                              await api.ideas.delete(ideaId);
-                              router.push("/dashboard");
-                            } catch (error) {
-                              console.error("Error deleting idea:", error);
-                            }
-                          }
-                        }}
-                      >
-                        <span className="text-lg">🗑️</span> Delete Idea
-                      </button>
-                      <button
-                        className="w-full text-left px-4 py-2 bg-white hover:bg-orange-50 text-orange-600 flex items-center gap-2 rounded-b-xl transition whitespace-nowrap"
-                        title="Generate Final Content"
-                      >
-                        <span className="text-lg">🤖</span> Generate Final
-                        Content
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Add Clip section in header - replaced with a simplified indicator */}
-              <div className="text-center py-3 bg-orange-50 rounded-xl border border-orange-100 shadow-sm flex items-center justify-center gap-2">
-                <span className="text-orange-600">
-                  Add clips to organize your ideas
-                </span>
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col ml-16 sm:ml-64 transition-all duration-300">
+        {/* Enhanced Header */}
+        <header className="bg-white border-b border-neutral-200 px-6 py-4">
+          <div className="w-full">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
                 <button
-                  className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors"
-                  onClick={() => setShowAddClipModal(true)}
+                  onClick={() => router.push("/dashboard")}
+                  className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-600 transition-colors"
+                  title="Back to Dashboard"
                 >
-                  Open Clip Editor
+                  ←
                 </button>
+                <div>
+                  {isEditingTitle ? (
+                    <input
+                      className="text-2xl font-bold text-neutral-900 bg-white border border-orange-200 rounded px-3 py-1 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                      value={editedTitle}
+                      autoFocus
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      onBlur={handleUpdateTitle}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleUpdateTitle();
+                        } else if (e.key === "Escape") {
+                          setIsEditingTitle(false);
+                          setEditedTitle(idea.title);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <h1 className="text-2xl font-bold text-neutral-900 flex items-center gap-2">
+                      {idea.title}
+                      <button
+                        className="text-orange-500 hover:text-orange-700 transition-colors p-1 rounded hover:bg-orange-50"
+                        title="Edit title"
+                        onClick={() => {
+                          setIsEditingTitle(true);
+                          setEditedTitle(idea.title);
+                        }}
+                      >
+                        <Icons.edit className="w-4 h-4" />
+                      </button>
+                    </h1>
+                  )}
+                  <p className="text-neutral-500 text-sm mt-1">
+                    {idea.description}
+                  </p>
+                </div>
               </div>
 
-              <div className="text-xs text-neutral-400 mt-2">
-                Tip: Use the + button in the corner to quickly add a clip.
+              {/* Action Buttons */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowAddClipModal(true)}
+                  className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  <span>+</span>
+                  <span className="hidden sm:inline">Add Clip</span>
+                </button>
+                <a
+                  href={`/editor/${idea.id}`}
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  <Icons.text className="w-4 h-4" />
+                  <span className="hidden sm:inline">Create Content</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div className="flex items-center gap-2 mt-4">
+              <span className="text-sm text-neutral-500">Tags:</span>
+              <div className="flex flex-wrap gap-2">
+                {idea.tags.map((tag: string) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-1 text-xs rounded bg-neutral-100 text-neutral-700 font-medium border border-neutral-200"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+                <button
+                  className="px-2 py-1 rounded bg-orange-100 text-orange-700 text-xs border border-orange-200 hover:bg-orange-200 transition-colors"
+                  title="Add tag"
+                  onClick={() => setShowTagInput(true)}
+                >
+                  +
+                </button>
+                {showTagInput && (
+                  <input
+                    className="px-2 py-1 rounded border border-neutral-200 text-xs"
+                    placeholder="New tag"
+                    value={newTag}
+                    autoFocus
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onBlur={() => {
+                      setShowTagInput(false);
+                      if (newTag.trim()) {
+                        setIdea({
+                          ...idea!,
+                          tags: [...idea!.tags, newTag.trim()],
+                        });
+                        setNewTag("");
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setShowTagInput(false);
+                        if (newTag.trim()) {
+                          setIdea({
+                            ...idea!,
+                            tags: [...idea!.tags, newTag.trim()],
+                          });
+                          setNewTag("");
+                        }
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Content Area */}
+        <div className="flex-1 p-6">
+          <div className="w-full">
+            {/* Stats and Progress */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-white rounded-xl p-4 border border-neutral-200">
+                <div className="text-2xl font-bold text-neutral-900">
+                  {clips.length}
+                </div>
+                <div className="text-sm text-neutral-500">Total Clips</div>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-neutral-200">
+                <div className="text-2xl font-bold text-green-600">
+                  {clips.filter((c) => c.type === "text").length}
+                </div>
+                <div className="text-sm text-neutral-500">Text Clips</div>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-neutral-200">
+                <div className="text-2xl font-bold text-blue-600">
+                  {
+                    clips.filter(
+                      (c) => c.type === "image" || c.type === "video"
+                    ).length
+                  }
+                </div>
+                <div className="text-sm text-neutral-500">Media Clips</div>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-neutral-200">
+                <div className="text-2xl font-bold text-orange-600">
+                  {idea.tags.length}
+                </div>
+                <div className="text-sm text-neutral-500">Tags</div>
               </div>
             </div>
 
             {/* Tabs and Clips */}
-            <div className="mb-8">
-              <nav className="flex gap-2 border-b border-neutral-200 pb-2 mb-4 overflow-x-auto">
-                {contentTypes.map((tab) => (
-                  <button
-                    key={tab.value}
-                    className={`px-4 py-2 rounded-t-lg font-medium transition-all ${
-                      activeTab === tab.value
-                        ? "bg-orange-50 text-orange-700 border-b-2 border-orange-500"
-                        : "hover:bg-neutral-100 text-neutral-500"
-                    }`}
-                    onClick={() => setActiveTab(tab.value as "all" | ClipType)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
+            <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+              <div className="border-b border-neutral-200">
+                <nav className="flex gap-1 p-4">
+                  {contentTypes.map((tab) => (
+                    <button
+                      key={tab.value}
+                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                        activeTab === tab.value
+                          ? "bg-orange-50 text-orange-700 border border-orange-200"
+                          : "hover:bg-neutral-100 text-neutral-500"
+                      }`}
+                      onClick={() =>
+                        setActiveTab(tab.value as "all" | ClipType)
+                      }
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </nav>
+              </div>
 
-              <section>
+              <div className="p-6">
                 {filteredClips.length === 0 ? (
-                  <div className="text-neutral-400 text-center py-8">
-                    No clips yet. Add your first clip!
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Icons.text className="text-neutral-400 w-8 h-8" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-neutral-900 mb-2">
+                      No clips yet
+                    </h3>
+                    <p className="text-neutral-500 mb-6">
+                      Start by adding your first clip to organize your ideas
+                    </p>
+                    <button
+                      onClick={() => setShowAddClipModal(true)}
+                      className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2 mx-auto"
+                    >
+                      <Icons.clip className="w-4 h-4" />
+                      Add Your First Clip
+                    </button>
                   </div>
                 ) : (
-                  <div className="flex flex-col gap-6">
+                  <div className="space-y-6">
                     {(
                       ["text", "image", "link", "code", "video"] as ClipType[]
                     ).map((type) => (
@@ -585,150 +604,10 @@ export default function Page() {
                     ))}
                   </div>
                 )}
-              </section>
-            </div>
-          </div>
-        </section>
-
-        {/* Mobile Content Preview - Appears when toggled */}
-        {showMobileEditor && (
-          <div className="fixed inset-0 bg-white z-50 md:hidden flex flex-col">
-            <div className="border-b border-neutral-200 p-4 flex justify-between items-center">
-              <h2 className="font-bold text-lg">Content Workspace</h2>
-              <button
-                className="p-2 rounded-full hover:bg-neutral-100"
-                onClick={() => setShowMobileEditor(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className="flex-1 overflow-auto p-6">
-              <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
-                <div className="p-6 flex flex-col items-center text-center">
-                  <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-2xl">📝</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                    Create Your Content
-                  </h3>
-                  <p className="text-neutral-600 mb-6">
-                    Transform your clips into polished content with our
-                    AI-powered editor.
-                  </p>
-                  <a
-                    href={`/editor/${idea.id}`}
-                    className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                  >
-                    <span>Open Full Editor</span>
-                    <span>→</span>
-                  </a>
-
-                  <div className="mt-6 pt-6 border-t border-neutral-100 w-full">
-                    <div className="flex justify-between text-sm text-neutral-500 mb-3">
-                      <span>Selected Clips:</span>
-                      <span>{clips.length}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Preview of recent clips */}
-                {clips.length > 0 && (
-                  <div className="border-t border-neutral-100 p-4">
-                    <h4 className="text-sm font-medium text-neutral-700 mb-3">
-                      Recent Clips
-                    </h4>
-                    <div className="space-y-2">
-                      {clips.slice(0, 3).map((clip) => (
-                        <div
-                          key={clip.id}
-                          className="text-xs text-neutral-600 bg-neutral-50 p-2 rounded truncate"
-                        >
-                          {clip.content.substring(0, 60)}...
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
-        )}
-
-        {/* Mobile Content Toggle Button */}
-        <button
-          className="md:hidden fixed bottom-24 right-24 z-30 bg-orange-500 text-white rounded-full p-4 shadow-lg"
-          onClick={() => setShowMobileEditor(true)}
-        >
-          <span className="text-xl">📝</span>
-        </button>
-
-        {/* Right Pane: Content Preview with Link to Editor */}
-        <aside className="hidden md:flex flex-col w-1/2 xl:w-1/3 border-l border-neutral-200 bg-white/80 backdrop-blur-lg p-6 min-h-screen overflow-y-auto">
-          <div className="sticky top-6">
-            <div className="flex flex-col mb-8">
-              <h2 className="text-2xl font-bold text-neutral-800 mb-2">
-                Content Workspace
-              </h2>
-              <p className="text-sm text-neutral-500">
-                Create and edit your content in our Notion-like editor.
-              </p>
-            </div>
-
-            {/* Content Workspace Card with CTA */}
-            <div className="bg-white rounded-xl shadow-sm border border-neutral-100 overflow-hidden">
-              <div className="p-6 flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl">📝</span>
-                </div>
-                <h3 className="text-xl font-bold text-neutral-800 mb-2">
-                  Ready to Create Content?
-                </h3>
-                <p className="text-neutral-600 mb-6">
-                  Transform your clips into cohesive, polished content with our
-                  AI-powered editor.
-                </p>
-                <a
-                  href={`/editor/${idea.id}`}
-                  className="w-full px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                  target="_blank"
-                >
-                  <span>Open Full Editor</span>
-                  <span>→</span>
-                </a>
-
-                <div className="mt-6 pt-6 border-t border-neutral-100 w-full">
-                  <div className="flex justify-between text-sm text-neutral-500 mb-3">
-                    <span>Selected Clips:</span>
-                    <span>{clips.length}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-neutral-500">
-                    <span>Content Type:</span>
-                    <span>{idea.tags[0] || "Article"}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Preview of recent clips */}
-              {clips.length > 0 && (
-                <div className="border-t border-neutral-100 p-4">
-                  <h4 className="text-sm font-medium text-neutral-700 mb-3">
-                    Recent Clips
-                  </h4>
-                  <div className="space-y-2">
-                    {clips.slice(0, 3).map((clip) => (
-                      <div
-                        key={clip.id}
-                        className="text-xs text-neutral-600 bg-neutral-50 p-2 rounded truncate"
-                      >
-                        {clip.content.substring(0, 60)}...
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </aside>
+        </div>
       </main>
 
       {/* Modal for clip preview/edit */}
